@@ -17,13 +17,19 @@ from .models import (
     Tool,
     TransientToolError,
 )
+from .planning import CatalogExpansionRequested, JSONPlanner, PlanningRequest
 from .registry import ResultValidator, ToolRegistry
+from .retrieval import CatalogPolicy
 from .routing import Planner, StrategyRouter, TaskAnalyzer, ToolRouter
 
 __all__ = [
     "Access",
     "Analysis",
     "Budget",
+    "CatalogExpansionRequested",
+    "CatalogPolicy",
+    "JSONPlanner",
+    "PlanningRequest",
     "Event",
     "Failure",
     "Orchestrator",

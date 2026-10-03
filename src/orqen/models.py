@@ -96,9 +96,10 @@ class Budget:
     max_retries: int = 1
     timeout_seconds: float = 30.0
     retry_delay_seconds: float = 0.01
+    max_planner_calls: int = 2
 
     def __post_init__(self) -> None:
-        for name in ("max_calls", "max_steps", "max_retries"):
+        for name in ("max_calls", "max_steps", "max_retries", "max_planner_calls"):
             value = getattr(self, name)
             if type(value) is not int or value < 0:
                 raise ValueError(f"{name} must be a nonnegative integer")
@@ -162,6 +163,7 @@ class RunResult:
     verified: bool
     analysis: Analysis | None = None
     estimated_cost: float | None = None
+    planner_calls: int = 0
 
     def trace(self) -> dict[str, Any]:
         """Metadata only: no task text, arguments, results, or exception messages."""
@@ -175,6 +177,7 @@ class RunResult:
             "failure": self.failure.value if self.failure else None,
             "events": [asdict(event) for event in self.events],
             "calls": self.calls,
+            "planner_calls": self.planner_calls,
             "retries": self.retries,
             "elapsed_seconds": self.elapsed_seconds,
             "verified": self.verified,

@@ -64,11 +64,11 @@ An unavailable unpinned tool can fall back to another registered tool in the sam
 
 ## Model adapters and current limits
 
-You can supply a `Planner` implementing `async plan(goal, catalog) -> Plan`, or supply a plan explicitly. The catalog contains authorized available tool metadata and schemas. Returned plans still pass through the same executor checks. No model provider is bundled in the first milestone; the included examples and policies are deterministic.
+You can supply a `Planner` implementing `async plan(goal, catalog) -> Plan`, supply a plan explicitly, or use `JSONPlanner` with an application-owned generation callback. The catalog contains authorized available tool metadata and schemas. Returned plans still pass through the same executor checks. No model provider is bundled; the examples use explicit plans or offline response replay. See [structured planning](planning.md).
 
 Task analysis currently derives complexity and dependencies from the supplied/generated plan and accepts an application-provided risk hint. It does not infer reliable business risk from natural language. Strategy selection chooses direct, function calling, or plan-and-execute according to the plan. Multi-agent execution is explicitly unsupported.
 
-These strategy labels currently use the same sequential executor. They are not separate reasoning algorithms and must not be advertised as evidence of adaptive reasoning. Lexical tool ranking operates within an explicit capability; it does not reduce the catalog shown to the planner. See the [independent research review](research-review.md).
+These strategy labels currently use the same sequential executor. They are not separate reasoning algorithms and must not be advertised as evidence of adaptive reasoning. Execution-time lexical tool ranking operates within an explicit capability. Separately, optional `CatalogPolicy` filtering can reduce the catalog shown to the planner. See the [independent research review](research-review.md) and [planning guide](planning.md).
 
 The default preserves registered tool order within each capability. Enable `Orchestrator(registry, adaptive_tools=True)` to test lexical ranking. It remains opt-in because it adds work without a demonstrated benefit on the current deterministic suite. Explicit tool pins always take precedence.
 

@@ -23,7 +23,9 @@ from .models import (
     Task,
     TransientToolError,
 )
+from .planning import CatalogExpansionRequested
 from .registry import ResultValidator, ToolRegistry
+from .retrieval import CatalogPolicy
 from .routing import Planner, StrategyRouter, TaskAnalyzer, ToolRouter, ordered_steps
 
 
@@ -70,6 +72,7 @@ class Orchestrator:
         adaptive_tools: bool = False,
         fixed_strategy: Strategy | None = None,
         recovery: bool = True,
+        catalog_policy: CatalogPolicy | None = None,
     ) -> None:
         self.registry = registry
         self.planner = planner
@@ -78,6 +81,7 @@ class Orchestrator:
         self.analyzer = TaskAnalyzer()
         self.fixed_strategy = fixed_strategy
         self.recovery = recovery
+        self.catalog_policy = catalog_policy or CatalogPolicy()
 
     async def run(
         self,
@@ -92,7 +96,7 @@ class Orchestrator:
         run_id = str(uuid4())
         events: list[Event] = []
         outputs: dict[str, Any] = {}
-        calls = retries = 0
+        calls = retries = planner_calls = 0
         strategy = None
         analysis = None
         reason = "Execution has not started"
@@ -112,6 +116,7 @@ class Orchestrator:
                 perf_counter() - start,
                 status == Status.SUCCESS,
                 analysis,
+                planner_calls=planner_calls,
             )
 
         if not callable(task.verify):
@@ -129,15 +134,37 @@ class Orchestrator:
                         "input_schema": tool.input_schema,
                         "output_schema": tool.output_schema,
                         "read_only": tool.read_only,
+                        "requires_confirmation": tool.requires_confirmation,
                     }
                     for tool in self.registry.all()
                     if tool.available and tool.permissions <= access.permissions
                 )
-                async with asyncio.timeout(max(0, deadline - perf_counter())):
-                    plan = await self.planner.plan(task.goal, catalog)
+                selected = self.catalog_policy.select(task.goal, catalog)
+                while True:
+                    if planner_calls >= budget.max_planner_calls or perf_counter() >= deadline:
+                        return finish(Status.BLOCKED, Failure.BUDGET)
+                    planner_calls += 1
+                    events.append(
+                        Event(
+                            "catalog_offered",
+                            candidates=tuple(tool["name"] for tool in selected),
+                            attempt=planner_calls,
+                        )
+                    )
+                    try:
+                        async with asyncio.timeout(max(0, deadline - perf_counter())):
+                            plan = await self.planner.plan(task.goal, deepcopy(selected))
+                        break
+                    except CatalogExpansionRequested:
+                        if len(selected) == len(catalog):
+                            return finish(Status.BLOCKED, Failure.NO_TOOL)
+                        selected = catalog
+                        events.append(Event("catalog_expanded"))
             if not isinstance(plan, Plan):
                 return finish(Status.BLOCKED, Failure.PLAN)
             plan = deepcopy(plan)
+            if len(plan.steps) > budget.max_steps:
+                return finish(Status.BLOCKED, Failure.BUDGET)
             steps = ordered_steps(plan, budget.max_steps)
             analysis = self.analyzer.analyze(task, plan)
             strategy, reason = self.strategy_router.select(analysis)
