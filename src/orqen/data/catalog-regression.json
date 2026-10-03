@@ -1,0 +1,28 @@
+{
+  "name": "catalog-regression-v1",
+  "evidence": "Hand-authored development fixtures, not held-out or model-based evidence",
+  "tools": [
+    {"name": "customer_find", "description": "Find customer identity by email", "capability": "customer.lookup"},
+    {"name": "subscription_read", "description": "Read subscription plan and renewal date", "capability": "subscription.read"},
+    {"name": "refund_policy", "description": "Check refund eligibility policy and rules", "capability": "refund.policy"},
+    {"name": "charge_find", "description": "Find original payment charge transaction", "capability": "payment.lookup"},
+    {"name": "refund_create", "description": "Issue refund against original payment charge", "capability": "payment.refund"},
+    {"name": "ticket_find", "description": "Find support ticket for customer", "capability": "ticket.lookup"},
+    {"name": "ticket_update", "description": "Update support ticket status", "capability": "ticket.update"},
+    {"name": "delivery_track", "description": "Track order delivery status", "capability": "delivery.track"},
+    {"name": "employee_find", "description": "Find employee identity in directory", "capability": "employee.lookup"},
+    {"name": "leave_balance", "description": "Check employee leave balance", "capability": "leave.balance"},
+    {"name": "leave_submit", "description": "Submit leave request for employee", "capability": "leave.submit"},
+    {"name": "notification_send", "description": "Send notification to recipient", "capability": "notification.send"}
+  ],
+  "queries": [
+    {"id": "refund_workflow", "goal": "Check refund eligibility, locate original charge, and issue refund", "required_tools": ["refund_policy", "charge_find", "refund_create"]},
+    {"id": "ticket_workflow", "goal": "Find customer by email and update their support ticket", "required_tools": ["customer_find", "ticket_find", "ticket_update"]},
+    {"id": "leave_workflow", "goal": "Check employee leave balance and submit leave request", "required_tools": ["employee_find", "leave_balance", "leave_submit"]},
+    {"id": "delivery", "goal": "Track order delivery status", "required_tools": ["delivery_track"]},
+    {"id": "renewal", "goal": "Find subscription renewal date", "required_tools": ["subscription_read"]},
+    {"id": "notification", "goal": "Send notification", "required_tools": ["notification_send"]},
+    {"id": "paraphrase", "goal": "Reimburse this purchase after checking the rules", "required_tools": ["refund_policy", "charge_find", "refund_create"]},
+    {"id": "missing_context", "goal": "Resolve it", "required_tools": ["customer_find", "ticket_find"]}
+  ]
+}

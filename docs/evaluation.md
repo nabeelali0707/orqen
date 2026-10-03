@@ -22,6 +22,8 @@ This suite does not test model tool selection, natural-language planning, held-o
 
 ## Comparisons
 
+The separate [catalog coverage experiment](catalog-results.md) now compares the full catalog, fixed top-1/top-3, and an adaptive lexical cutoff on prerequisite-labeled queries. Run `orqen evaluate-catalog` for that report. This measures retrieval coverage, not the future model-based comparisons below.
+
 1. Fixed strategy with the full permitted tool set.
 2. Same strategy with adaptive tool retrieval only.
 3. Adaptive strategy selection with the full permitted tool set.

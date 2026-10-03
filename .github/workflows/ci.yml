@@ -25,3 +25,5 @@ jobs:
       - run: python -m pytest -q
       - run: python examples/customer_workflow.py
       - run: python -m orqen.cli evaluate --repetitions 1
+      - run: python examples/structured_planner.py
+      - run: python -m orqen.cli evaluate-catalog

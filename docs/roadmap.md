@@ -23,12 +23,16 @@
 - [x] Local fault-suite results with overhead and failure analysis.
 - [ ] Independently held-out tasks and real model comparisons. Local fixtures are not held-out evidence.
 - [ ] Distinct reasoning implementations before any strategy-selection comparison.
+- [x] Catalog-level coverage experiment with multiple capabilities and prerequisite labels.
+- [x] Full, fixed top-k, and adaptive lexical catalog policies with explicit expansion.
 
 After the independent review, action contracts and independent grading take priority over additional agent architectures. Lexical ranking remains opt-in; no benefit has been established on the current fixtures. See `docs/research-review.md` and `docs/local-results.md`.
 
 ## 3. Research integration
 
 - [ ] Model adapter and reproducible model settings.
+- [x] Provider-neutral JSON transport adapter, response validation, and planning-call budgets.
+- [ ] Live provider transport with recorded model settings and usage; no live model tested yet.
 - [ ] AgentArch adapter with documented upstream revision.
 - [ ] Repeated trials and component ablations.
 - [ ] Multi-agent strategy only as an explicit, measurable implementation.

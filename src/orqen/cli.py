@@ -16,7 +16,29 @@ def main() -> None:
     evaluate_parser.add_argument("--seed", type=int, default=0)
     evaluate_parser.add_argument("--output", type=Path, default=Path("runs/local-evaluation.json"))
     evaluate_parser.add_argument("--traces", type=Path)
+    catalog_parser = subparsers.add_parser(
+        "evaluate-catalog", help="Measure required-tool coverage"
+    )
+    catalog_parser.add_argument("--dataset", type=Path)
+    catalog_parser.add_argument("--output", type=Path, default=Path("runs/catalog-evaluation.json"))
     args = parser.parse_args()
+    if args.command == "evaluate-catalog":
+        from .catalog_evaluation import default_dataset, evaluate_catalog
+        from .evaluation import write_report
+
+        try:
+            dataset = (
+                json.loads(args.dataset.read_text("utf-8")) if args.dataset else default_dataset()
+            )
+            report = evaluate_catalog(dataset)
+        except (OSError, ValueError) as exc:
+            parser.error(str(exc))
+        write_report(report, args.output)
+        print(
+            json.dumps({"evidence": report["evidence"], "summaries": report["summaries"]}, indent=2)
+        )
+        print(f"Report: {args.output.resolve()}")
+        return
     if args.command != "evaluate":
         parser.print_help()
         return

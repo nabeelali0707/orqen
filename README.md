@@ -14,6 +14,7 @@ python -m venv .venv
 .\.venv\Scripts\python.exe examples/customer_workflow.py
 .\.venv\Scripts\python.exe -m pytest -q
 .\.venv\Scripts\python.exe -m orqen.cli evaluate --repetitions 5 --seed 17
+.\.venv\Scripts\python.exe -m orqen.cli evaluate-catalog
 ```
 
 See the [SDK guide](docs/sdk.md) for integration examples and execution limits.
@@ -49,9 +50,11 @@ Orqen is an independent project, not an AgentArch implementation. Its local faul
 
 - [Architecture and implementation boundaries](docs/architecture.md)
 - [Python SDK usage](docs/sdk.md)
+- [Structured planning and catalog policies](docs/planning.md)
 - [Controlled evaluation plan](docs/evaluation.md)
 - [Independent research and architecture review](docs/research-review.md)
 - [Measured local fault-suite results](docs/local-results.md)
+- [Catalog coverage results and failures](docs/catalog-results.md)
 - [Development milestones](docs/roadmap.md)
 
 ## Development workflow
