@@ -6,6 +6,8 @@ Orqen is a proposed orchestration engine that helps agents choose an execution s
 
 Orqen includes a working modular Python SDK with deterministic routing, dependency-aware execution, JSON Schema validation, application-owned permissions, task verification, and bounded read recovery. Model providers and multi-agent execution are not bundled yet.
 
+The current focus is a small contract-enforcing execution and evaluation layer. The original adaptive-orchestration concept remains a research hypothesis; see the [independent review and revised direction](docs/research-review.md).
+
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e ".[dev]"

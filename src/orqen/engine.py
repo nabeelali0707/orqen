@@ -48,6 +48,19 @@ def _resolve(value: Any, outputs: Mapping[str, Any]) -> Any:
     return deepcopy(value)
 
 
+async def _check(callback: Any, deadline: float, *arguments: Any) -> bool:
+    """Trusted checks may read state; require literal True and honor run deadlines."""
+    if perf_counter() >= deadline:
+        raise TimeoutError
+    async with asyncio.timeout(max(0, deadline - perf_counter())):
+        value = callback(*deepcopy(arguments))
+        if inspect.isawaitable(value):
+            value = await value
+    if perf_counter() >= deadline:
+        raise TimeoutError
+    return value is True
+
+
 class Orchestrator:
     def __init__(
         self,
@@ -183,6 +196,23 @@ class Orchestrator:
                 remaining = deadline - perf_counter()
                 if remaining <= 0 or calls >= budget.max_calls:
                     return finish(Status.BLOCKED, Failure.BUDGET)
+                if tool.precondition is not None:
+                    try:
+                        allowed = await _check(tool.precondition, deadline, arguments, access)
+                    except TimeoutError:
+                        return finish(Status.BLOCKED, Failure.BUDGET)
+                    except Exception:
+                        allowed = False
+                    events.append(
+                        Event(
+                            "precondition_checked",
+                            step.id,
+                            tool.name,
+                            None if allowed else Failure.PRECONDITION,
+                        )
+                    )
+                    if not allowed:
+                        return finish(Status.BLOCKED, Failure.PRECONDITION)
                 attempt += 1
                 calls += 1
                 events.append(Event("called", step.id, tool.name, attempt=attempt))
@@ -222,18 +252,34 @@ class Orchestrator:
 
             if not ResultValidator.matches(tool.output_schema, output):
                 return finish(Status.FAILED if tool.read_only else Status.UNKNOWN, Failure.OUTPUT)
+            if tool.postcondition is not None:
+                try:
+                    verified = await _check(tool.postcondition, deadline, arguments, output)
+                except TimeoutError:
+                    return finish(
+                        Status.BLOCKED if tool.read_only else Status.UNKNOWN, Failure.BUDGET
+                    )
+                except Exception:
+                    verified = False
+                events.append(
+                    Event(
+                        "postcondition_checked",
+                        step.id,
+                        tool.name,
+                        None if verified else Failure.POSTCONDITION,
+                    )
+                )
+                if not verified:
+                    return finish(
+                        Status.FAILED if tool.read_only else Status.UNKNOWN, Failure.POSTCONDITION
+                    )
             outputs[step.id] = deepcopy(output)
             events.append(Event("output_validated", step.id, tool.name))
 
         if perf_counter() >= deadline:
             return finish(Status.BLOCKED, Failure.BUDGET)
         try:
-            # Require an actual bool; truthy error objects must never pass.
-            async with asyncio.timeout(max(0, deadline - perf_counter())):
-                verification = task.verify(deepcopy(outputs))
-                if inspect.isawaitable(verification):
-                    verification = await verification
-                verified = verification is True
+            verified = await _check(task.verify, deadline, outputs)
         except TimeoutError:
             return finish(Status.BLOCKED, Failure.BUDGET)
         except Exception:

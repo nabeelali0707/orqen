@@ -30,6 +30,8 @@ class Failure(StrEnum):
     UNAVAILABLE = "tool_unavailable"
     PERMISSION = "permission_denied"
     CONFIRMATION = "confirmation_required"
+    PRECONDITION = "precondition_failed"
+    POSTCONDITION = "postcondition_failed"
     ARGUMENTS = "invalid_arguments"
     OUTPUT = "invalid_output"
     VERIFICATION = "verification_failed"
@@ -82,6 +84,10 @@ class Access:
     permissions: frozenset[str] = frozenset()
     confirmed_tools: frozenset[str] = frozenset()
 
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "permissions", frozenset(self.permissions))
+        object.__setattr__(self, "confirmed_tools", frozenset(self.confirmed_tools))
+
 
 @dataclass(frozen=True)
 class Budget:
@@ -113,10 +119,13 @@ class Tool:
     input_schema: Mapping[str, Any]
     output_schema: Mapping[str, Any]
     permissions: frozenset[str] = frozenset()
-    read_only: bool = True
+    # Opt in explicitly to read retries; an omitted declaration is conservative.
+    read_only: bool = False
     requires_confirmation: bool = False
     available: bool = True
     timeout_seconds: float = 10.0
+    precondition: Callable[[Mapping[str, Any], Access], bool | Awaitable[bool]] | None = None
+    postcondition: Callable[[Mapping[str, Any], Any], bool | Awaitable[bool]] | None = None
 
 
 @dataclass(frozen=True)

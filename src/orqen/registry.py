@@ -40,6 +40,13 @@ class ToolRegistry:
             raise ValueError("Tool name and capability are required")
         if tool.name in self._tools:
             raise ValueError(f"Duplicate tool: {tool.name}")
+        for name in ("read_only", "requires_confirmation", "available"):
+            if type(getattr(tool, name)) is not bool:
+                raise TypeError(f"{name} must be a bool")
+        for name in ("precondition", "postcondition"):
+            check = getattr(tool, name)
+            if check is not None and not callable(check):
+                raise TypeError(f"{name} must be callable")
         if not (
             inspect.iscoroutinefunction(tool.handler)
             or inspect.iscoroutinefunction(getattr(tool.handler, "__call__", None))  # noqa: B004

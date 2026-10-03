@@ -35,7 +35,8 @@ async def double(value):
 
 def make_tool(**kwargs):
     return replace(
-        Tool("double", "Double a number", "math.double", double, INPUT, OUTPUT), **kwargs
+        Tool("double", "Double a number", "math.double", double, INPUT, OUTPUT, read_only=True),
+        **kwargs,
     )
 
 

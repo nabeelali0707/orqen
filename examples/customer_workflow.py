@@ -41,6 +41,7 @@ async def main() -> None:
                     "required": ["id", "tier"],
                     "additionalProperties": False,
                 },
+                read_only=True,
             ),
             Tool(
                 "queue_selector",
@@ -54,6 +55,7 @@ async def main() -> None:
                     "required": ["queue"],
                     "additionalProperties": False,
                 },
+                read_only=True,
             ),
         )
     )
