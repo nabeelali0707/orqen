@@ -70,6 +70,8 @@ Task analysis currently derives complexity and dependencies from the supplied/ge
 
 These strategy labels currently use the same sequential executor. They are not separate reasoning algorithms and must not be advertised as evidence of adaptive reasoning. Lexical tool ranking operates within an explicit capability; it does not reduce the catalog shown to the planner. See the [independent research review](research-review.md).
 
+The default preserves registered tool order within each capability. Enable `Orchestrator(registry, adaptive_tools=True)` to test lexical ranking. It remains opt-in because it adds work without a demonstrated benefit on the current deterministic suite. Explicit tool pins always take precedence.
+
 Tool handlers must be async and cooperate with cancellation. `asyncio` timeouts cannot kill blocking code or roll back remote actions. Use adapter-native network deadlines and an isolated worker for untrusted or blocking execution. An external cancellation propagates to the caller; reconcile any in-flight write before resubmission.
 
 JSON Schema Draft 2020-12 is used without network schema references. Format annotations such as `email` are not asserted; encode required constraints explicitly or use application checks. Tool outputs must be JSON-compatible, finite values. No automatic argument coercion occurs.
@@ -79,3 +81,7 @@ JSON Schema Draft 2020-12 is used without network schema references. Format anno
 `RunResult` includes status, failure category, partial outputs, strategy, calls, retries, duration, and verification status. Cost is `None` until a model integration provides measured usage and pricing.
 
 `result.trace()` excludes the task text, arguments, outputs, and exception messages. Tool and step identifiers remain in metadata, so choose identifiers without personal data. `result.outputs` is intentionally available to the application and may contain sensitive data; do not log the entire result by default.
+
+`calls` counts actual handler invocations including failed attempts. `retries` counts actual repeated invocations, excluding a scheduled retry denied by a precondition or budget. A `retry_scheduled` event does not establish that the retry happened.
+
+The `orqen evaluate` CLI writes a local JSON report and optional JSONL metadata traces. See [evaluation instructions](evaluation.md). Reports overwrite the explicitly selected output paths; raw run artifacts remain ignored by Git.

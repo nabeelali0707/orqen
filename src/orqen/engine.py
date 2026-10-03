@@ -67,7 +67,7 @@ class Orchestrator:
         registry: ToolRegistry,
         *,
         planner: Planner | None = None,
-        adaptive_tools: bool = True,
+        adaptive_tools: bool = False,
         fixed_strategy: Strategy | None = None,
         recovery: bool = True,
     ) -> None:
@@ -213,6 +213,8 @@ class Orchestrator:
                     )
                     if not allowed:
                         return finish(Status.BLOCKED, Failure.PRECONDITION)
+                if attempt:
+                    retries += 1
                 attempt += 1
                 calls += 1
                 events.append(Event("called", step.id, tool.name, attempt=attempt))
@@ -246,8 +248,7 @@ class Orchestrator:
                 delay = budget.retry_delay_seconds * 2 ** (attempt - 1)
                 if calls >= budget.max_calls or perf_counter() + delay >= deadline:
                     return finish(Status.BLOCKED, Failure.BUDGET)
-                retries += 1
-                events.append(Event("retry", step.id, tool.name, error, attempt))
+                events.append(Event("retry_scheduled", step.id, tool.name, error, attempt))
                 await asyncio.sleep(delay)
 
             if not ResultValidator.matches(tool.output_schema, output):

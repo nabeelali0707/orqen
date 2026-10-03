@@ -4,7 +4,7 @@
 
 The Python SDK mediates between an application, a model adapter, and registered tools. Core decisions and trace formats should remain independent of a model provider. A hosted API, dashboard, and MCP integration are later interfaces over the same engine.
 
-The table describes the target design. The first SDK implements explicit plans, metadata-based strategy selection, capability-constrained lexical tool ranking, validation, sequential async execution, verification, and conservative read recovery. Natural-language risk analysis, learned retrieval, and multi-agent execution remain future work. See [the SDK guide](sdk.md) for exact behavior and limits.
+The table describes the target design. The SDK implements explicit plans, metadata-based strategy labels, optional capability-constrained lexical tool ranking, validation, sequential async execution, action contracts, verification, and conservative read recovery. Natural-language risk analysis, learned retrieval, and multi-agent execution remain future work. The [independent review](research-review.md) supersedes assumptions that these modules each require a separate intelligent subsystem. See [the SDK guide](sdk.md) for exact behavior and limits.
 
 | Component | Input | Output and responsibility |
 | --- | --- | --- |
@@ -26,6 +26,8 @@ Do not silently label sequential calls as multi-agent execution. Expose supporte
 ## Execution contract
 
 Before invocation, check tool availability, schema validity, application permissions, required confirmation, and remaining call/time budgets. Validate outputs against their contracts, then evaluate task-specific postconditions. A syntactically valid response does not establish business success.
+
+Application-owned tool preconditions execute before each attempt. Tool postconditions run before the result is released to dependent steps. Task verification then checks the overall goal. These checks share the run budget and fail closed. Omitted `read_only` metadata is treated as potentially state-changing, so safe retries require an explicit declaration. Neither model proposals nor retrieved content can install or change contracts.
 
 For consequential operations, support independent state verification where the integration allows it. A timeout can mean the action completed but its response was lost; report an unknown outcome until reconciled.
 

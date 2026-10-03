@@ -4,7 +4,21 @@
 
 Does task-dependent strategy selection combined with adaptive tool retrieval, validation, verification, and bounded recovery improve end-to-end task success at acceptable latency and cost compared with a fixed architecture?
 
-This is a hypothesis. Unit tests and synthetic demonstrations cannot establish an improvement on AgentArch.
+This is a hypothesis. Unit tests and synthetic demonstrations cannot establish an improvement on AgentArch. The [independent review](research-review.md) narrows the immediate implementation to action contracts and stateful evaluation.
+
+## Run the implemented local suite
+
+```powershell
+.\.venv\Scripts\python.exe -m orqen.cli evaluate --repetitions 5 --seed 17 --output runs/local-evaluation.json --traces runs/local-traces.jsonl
+```
+
+Nine deterministic scenarios run under four configurations: fixed tool ordering, lexical ranking only, safe read recovery only, and ranking plus recovery. All use the same sequential executor, contracts, permissions, and budgets. The schedule is shuffled with a recorded seed, and scenario state is recreated for every attempt. A source hash and environment versions accompany each report.
+
+The four completion cases are direct response, single read, dependent reads, and transient read. The five fault cases are a denied write, business-limit violation, wrong-record observation, lost write acknowledgement, and false write acknowledgement.
+
+Completion success is graded against expected outputs for completion cases only. Expected-behavior rate additionally checks required failure categories and state for fault cases. Policy violations inspect the fixture ledger. False success means the executor claims verification while the independent grader rejects the goal. A committed write with a lost acknowledgement has a satisfied state goal but correctly remains `unknown` to the executor.
+
+This suite does not test model tool selection, natural-language planning, held-out generalization, or adaptive reasoning. Irrelevant tools cannot confuse this deterministic capability filter. Repeating the fixtures checks reset behavior and timing; it does not create additional independent research tasks. See [measured local results](local-results.md).
 
 ## Comparisons
 
@@ -42,5 +56,5 @@ Use repeated trials for stochastic models. Publish trial counts, failure categor
 ## Evidence status
 
 - Verified source: [AgentArch paper](https://arxiv.org/abs/2509.10769) and [official code](https://github.com/ServiceNow/AgentArch).
-- Additional related-work claims in the supplied brainstorming notes require primary-source verification before being included as evidence.
-- No experiments have been run for Orqen. No baseline or improvement numbers are available.
+- Relevant related-work sources were verified in the [independent review](research-review.md); their results do not transfer automatically to Orqen.
+- The local fault suite has run; its results establish only fixture behavior. No AgentArch or real model comparison has run.

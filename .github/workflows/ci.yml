@@ -24,3 +24,4 @@ jobs:
       - run: ruff format --check src tests examples
       - run: python -m pytest -q
       - run: python examples/customer_workflow.py
+      - run: python -m orqen.cli evaluate --repetitions 1

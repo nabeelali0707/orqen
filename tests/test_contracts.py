@@ -61,6 +61,7 @@ def test_precondition_is_rechecked_before_retry():
     tool = make_tool(handler=read, precondition=lambda args, access: allowed)
     result = run(task(Step("a", "math.double", {"value": 2})), [tool])
     assert result.failure == Failure.PRECONDITION and result.calls == 1
+    assert result.retries == 0  # A scheduled retry that was denied is not an invocation.
 
 
 def test_postcondition_blocks_dependent_action():

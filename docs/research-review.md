@@ -80,7 +80,7 @@ Preserve the tested async executor. Add before/after action contracts, conservat
 
 The initial SDK passed 48 local tests before this review. Its direct/function/plan labels share one sequential executor, and its planner sees the full authorized catalog. Therefore the initial code does not demonstrate adaptive reasoning or reduced model context. The example is a supplied plan, not a natural-language agent.
 
-The next implementation adds the contracts and evaluation described above. It will not provide durable resume, atomic authorization, exactly-once effects, automatic compensation, live policy learning, or general semantic correctness. Cooperative async timeouts cannot forcibly stop blocking Python code.
+Follow-up implementation added the action contracts and evaluation described above; see [local results](local-results.md). It does not provide durable resume, atomic authorization, exactly-once effects, automatic compensation, live policy learning, or general semantic correctness. Cooperative async timeouts cannot forcibly stop blocking Python code.
 
 ## 10. Honest assessment
 

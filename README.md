@@ -13,6 +13,7 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e ".[dev]"
 .\.venv\Scripts\python.exe examples/customer_workflow.py
 .\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe -m orqen.cli evaluate --repetitions 5 --seed 17
 ```
 
 See the [SDK guide](docs/sdk.md) for integration examples and execution limits.
@@ -42,13 +43,15 @@ Inspired by [AgentArch: A Comprehensive Benchmark to Evaluate Agent Architecture
 
 AgentArch evaluates architectural configurations in enterprise workflows. Its task- and model-dependent findings motivate our hypothesis: selecting orchestration strategies and tool sets according to task requirements may improve reliability and efficiency over a fixed architecture.
 
-Orqen is an independent proposal, not an AgentArch implementation. No Orqen benchmark results or performance improvements have been established.
+Orqen is an independent project, not an AgentArch implementation. Its local fault suite checks executor behavior; no AgentArch results or real model performance improvements have been established.
 
 ## Project documents
 
 - [Architecture and implementation boundaries](docs/architecture.md)
 - [Python SDK usage](docs/sdk.md)
 - [Controlled evaluation plan](docs/evaluation.md)
+- [Independent research and architecture review](docs/research-review.md)
+- [Measured local fault-suite results](docs/local-results.md)
 - [Development milestones](docs/roadmap.md)
 
 ## Development workflow

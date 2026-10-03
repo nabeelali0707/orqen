@@ -17,10 +17,14 @@
 
 ## 2. Controlled local experiments
 
-- [ ] Fixed baseline and separate tool/strategy routing configurations.
+- [x] Fixed ordering versus lexical ranking, crossed with read recovery on/off.
 - [x] Dependent-step ordering and reference-based data flow; plans are application- or adapter-supplied.
-- [ ] Held-out task fixtures, reproducible configurations, and trace export.
-- [ ] Measured results with overhead and failure analysis.
+- [x] Stateful regression fixtures, reproducible configurations, and redacted trace export.
+- [x] Local fault-suite results with overhead and failure analysis.
+- [ ] Independently held-out tasks and real model comparisons. Local fixtures are not held-out evidence.
+- [ ] Distinct reasoning implementations before any strategy-selection comparison.
+
+After the independent review, action contracts and independent grading take priority over additional agent architectures. Lexical ranking remains opt-in; no benefit has been established on the current fixtures. See `docs/research-review.md` and `docs/local-results.md`.
 
 ## 3. Research integration
 
