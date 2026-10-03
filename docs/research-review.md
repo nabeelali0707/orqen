@@ -91,3 +91,9 @@ The problem is real; the original breadth is premature. Existing work supports i
 The structured JSON adapter now validates generated proposals, pins offered tools, and supports bounded full-catalog expansion before execution. The full authorized catalog remains the default. A separate lexical catalog filter is opt-in; this differs from the older execution-time ordering within one capability.
 
 An eight-query development fixture found complete prerequisite coverage on six queries with the adaptive filter, compared with eight using the full catalog. The smaller catalog therefore has a real coverage cost in this fixture. See [catalog results](catalog-results.md) for both failures and metric definitions. No heuristic was retuned to hide those failures, and no model was invoked. This supports retaining a conservative default; it does not establish a generally optimal retrieval policy.
+
+## Follow-up: partial-write audit
+
+Targeted tests reproduced five avoidable partial-write paths: later missing tools, denied permissions, absent confirmation, invalid literal arguments, and an insufficient minimum call budget. The executor previously discovered these only after earlier calls. Whole-plan preflight now rejects those known defects before invoking any handler. Dynamic checks remain just-in-time because they depend on actual results or changing backend state.
+
+The audit also reproduced incorrect final-verification classification: a verifier exception after a write returned `failed`, and a verifier timeout returned `blocked`. Those cases now return `unknown`. Results and traces record attempted write steps and expose a reconciliation flag on non-successful runs with writes. This prevents callers from confusing a failed goal with a workflow that had no effects. It is not an exactly-once or rollback guarantee.

@@ -301,8 +301,8 @@ def test_zero_call_budget_still_allows_direct_response():
     assert result.verified and result.calls == 0
 
 
-def test_partial_results_are_retained_when_later_call_is_blocked():
+def test_missing_later_tool_is_detected_before_execution():
     result = run(
         task(Step("a", "math.double", {"value": 2}), Step("b", "missing", {}, depends_on=("a",)))
     )
-    assert result.outputs == {"a": 4} and result.failure == Failure.NO_TOOL
+    assert result.outputs == {} and result.failure == Failure.NO_TOOL and result.calls == 0

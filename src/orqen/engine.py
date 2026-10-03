@@ -26,7 +26,7 @@ from .models import (
 from .planning import CatalogExpansionRequested
 from .registry import ResultValidator, ToolRegistry
 from .retrieval import CatalogPolicy
-from .routing import Planner, StrategyRouter, TaskAnalyzer, ToolRouter, ordered_steps
+from .routing import Planner, StrategyRouter, TaskAnalyzer, ToolRouter, ordered_steps, references
 
 
 def _resolve(value: Any, outputs: Mapping[str, Any]) -> Any:
@@ -96,6 +96,7 @@ class Orchestrator:
         run_id = str(uuid4())
         events: list[Event] = []
         outputs: dict[str, Any] = {}
+        write_steps: list[str] = []
         calls = retries = planner_calls = 0
         strategy = None
         analysis = None
@@ -117,6 +118,7 @@ class Orchestrator:
                 status == Status.SUCCESS,
                 analysis,
                 planner_calls=planner_calls,
+                write_steps=tuple(write_steps),
             )
 
         if not callable(task.verify):
@@ -189,6 +191,11 @@ class Orchestrator:
                 return finish(Status.FAILED, Failure.OUTPUT)
             outputs["direct"] = deepcopy(plan.direct_result)
 
+        # Validate what is knowable before any handler runs. Dynamic preconditions
+        # and reference-dependent arguments are checked again at invocation time.
+        if len(steps) > budget.max_calls:
+            return finish(Status.BLOCKED, Failure.BUDGET)
+        prepared = {}
         for step in steps:
             if perf_counter() >= deadline or calls >= budget.max_calls:
                 return finish(Status.BLOCKED, Failure.BUDGET)
@@ -211,6 +218,20 @@ class Orchestrator:
                 return finish(Status.BLOCKED, Failure.PERMISSION)
             if tool.requires_confirmation and tool.name not in access.confirmed_tools:
                 return finish(Status.BLOCKED, Failure.CONFIRMATION)
+            if not references(step.arguments):
+                try:
+                    literal_arguments = _resolve(step.arguments, {})
+                except Exception:
+                    return finish(Status.BLOCKED, Failure.ARGUMENTS)
+                if not ResultValidator.matches(tool.input_schema, literal_arguments):
+                    return finish(Status.BLOCKED, Failure.ARGUMENTS)
+            prepared[step.id] = tool
+
+        events.append(Event("preflight_passed"))
+        for step in steps:
+            if perf_counter() >= deadline or calls >= budget.max_calls:
+                return finish(Status.BLOCKED, Failure.BUDGET)
+            tool = prepared[step.id]
             try:
                 arguments = _resolve(step.arguments, outputs)
             except Exception:
@@ -244,6 +265,8 @@ class Orchestrator:
                     retries += 1
                 attempt += 1
                 calls += 1
+                if not tool.read_only:
+                    write_steps.append(step.id)
                 events.append(Event("called", step.id, tool.name, attempt=attempt))
                 error = None
                 call_deadline = min(deadline, perf_counter() + tool.timeout_seconds)
@@ -305,15 +328,15 @@ class Orchestrator:
             events.append(Event("output_validated", step.id, tool.name))
 
         if perf_counter() >= deadline:
-            return finish(Status.BLOCKED, Failure.BUDGET)
+            return finish(Status.UNKNOWN if write_steps else Status.BLOCKED, Failure.BUDGET)
         try:
             verified = await _check(task.verify, deadline, outputs)
         except TimeoutError:
-            return finish(Status.BLOCKED, Failure.BUDGET)
+            return finish(Status.UNKNOWN if write_steps else Status.BLOCKED, Failure.BUDGET)
         except Exception:
-            verified = False
+            return finish(Status.UNKNOWN if write_steps else Status.FAILED, Failure.VERIFICATION)
         if perf_counter() >= deadline:
-            return finish(Status.BLOCKED, Failure.BUDGET)
+            return finish(Status.UNKNOWN if write_steps else Status.BLOCKED, Failure.BUDGET)
         events.append(Event("verified" if verified else "verification_failed"))
         return finish(
             Status.SUCCESS if verified else Status.FAILED,

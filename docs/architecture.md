@@ -29,6 +29,8 @@ Before invocation, check tool availability, schema validity, application permiss
 
 Application-owned tool preconditions execute before each attempt. Tool postconditions run before the result is released to dependent steps. Task verification then checks the overall goal. These checks share the run budget and fail closed. Omitted `read_only` metadata is treated as potentially state-changing, so safe retries require an explicit declaration. Neither model proposals nor retrieved content can install or change contracts.
 
+Before invoking any handler, preflight selects tools for all steps and rejects known availability, permission, confirmation, literal-argument, and minimum-call-budget defects. Preconditions requiring live state and arguments requiring previous outputs remain execution-time checks. Partial execution is therefore still possible. Results include attempted write step IDs and a reconciliation flag so a caller does not assume whole-run replay is safe after a later failure.
+
 For consequential operations, support independent state verification where the integration allows it. A timeout can mean the action completed but its response was lost; report an unknown outcome until reconciled.
 
 ## Recovery boundaries

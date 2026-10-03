@@ -164,6 +164,12 @@ class RunResult:
     analysis: Analysis | None = None
     estimated_cost: float | None = None
     planner_calls: int = 0
+    write_steps: tuple[str, ...] = ()
+
+    @property
+    def requires_reconciliation(self) -> bool:
+        """A non-successful run attempted writes; do not infer safe whole-run replay."""
+        return bool(self.write_steps) and self.status != Status.SUCCESS
 
     def trace(self) -> dict[str, Any]:
         """Metadata only: no task text, arguments, results, or exception messages."""
@@ -178,6 +184,8 @@ class RunResult:
             "events": [asdict(event) for event in self.events],
             "calls": self.calls,
             "planner_calls": self.planner_calls,
+            "write_steps": list(self.write_steps),
+            "requires_reconciliation": self.requires_reconciliation,
             "retries": self.retries,
             "elapsed_seconds": self.elapsed_seconds,
             "verified": self.verified,

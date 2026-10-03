@@ -48,6 +48,10 @@ print(result.outputs)
 
 Use `Ref("customer", ("tier",))` to pass a previous step's output field into another call. References create dependency edges automatically. Use `depends_on=("customer",)` for ordering without data flow. The executor rejects cycles and missing dependencies before invoking any tools.
 
+Before execution, Orqen resolves tool choices for the whole plan and checks availability, declared permissions, confirmation, all-literal argument schemas, and whether the remaining call budget can cover at least one invocation per step. A known rejection in a later step prevents earlier steps from running. This applies to supplied plans and planner-generated plans alike.
+
+This preflight is not a transaction or a prediction of success. Reference-dependent arguments and live business preconditions are checked at execution time; a later failure can still follow an earlier write. Prepared tool choices remain fixed for the run. Use application preconditions and backend checks for live authorization or changing state.
+
 Every task requires an application-owned `verify` callback. It receives all validated outputs and must return the literal boolean `True` to establish success. The callback may be async to read independent state. It should be read-only and avoid blocking the event loop. Output schema validation is separate from business verification.
 
 ## Permissions and recovery
@@ -79,6 +83,10 @@ JSON Schema Draft 2020-12 is used without network schema references. Format anno
 ## Results and traces
 
 `RunResult` includes status, failure category, partial outputs, strategy, calls, retries, duration, and verification status. Cost is `None` until a model integration provides measured usage and pricing.
+
+`write_steps` records the step identifiers for every attempted potentially state-changing call. For a non-successful run containing such an attempt, `requires_reconciliation` is `True`. This flag means the application should inspect relevant backend state before resubmitting the workflow; it does not prove that the write committed. Both fields are included in metadata traces.
+
+If the final verifier raises or times out after a write, the result is `unknown`. A verifier returning literal `False` instead establishes a failed goal, but prior write attempts still require reconciliation. A later dynamic precondition can return `blocked` with partial outputs and `requires_reconciliation=True`. Do not infer safe replay from status alone. No rollback, durable replay protection, or automatic reconciliation is implemented.
 
 `result.trace()` excludes the task text, arguments, outputs, and exception messages. Tool and step identifiers remain in metadata, so choose identifiers without personal data. `result.outputs` is intentionally available to the application and may contain sensitive data; do not log the entire result by default.
 

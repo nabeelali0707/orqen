@@ -14,6 +14,7 @@
 - [x] Function execution with task postcondition checks.
 - [x] Bounded recovery for safe transient failures.
 - [x] Local examples and behavioral tests covering failures and side effects.
+- [x] Whole-plan preflight for known defects before writes, plus partial-write reconciliation metadata.
 
 ## 2. Controlled local experiments
 
