@@ -4,7 +4,7 @@
 
 The Python SDK mediates between an application, a model adapter, and registered tools. Core decisions and trace formats should remain independent of a model provider. A hosted API, dashboard, and MCP integration are later interfaces over the same engine.
 
-The following modules describe intended behavior, not existing implementations.
+The table describes the target design. The first SDK implements explicit plans, metadata-based strategy selection, capability-constrained lexical tool ranking, validation, sequential async execution, verification, and conservative read recovery. Natural-language risk analysis, learned retrieval, and multi-agent execution remain future work. See [the SDK guide](sdk.md) for exact behavior and limits.
 
 | Component | Input | Output and responsibility |
 | --- | --- | --- |

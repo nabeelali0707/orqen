@@ -4,7 +4,16 @@
 
 Orqen is a proposed orchestration engine that helps agents choose an execution strategy, discover relevant tools, validate calls, verify outcomes, and recover from failures within explicit limits.
 
-The initial implementation direction is a modular Python SDK. This repository currently contains the project specification and research plan; the runtime is not implemented yet.
+Orqen includes a working modular Python SDK with deterministic routing, dependency-aware execution, JSON Schema validation, application-owned permissions, task verification, and bounded read recovery. Model providers and multi-agent execution are not bundled yet.
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+.\.venv\Scripts\python.exe examples/customer_workflow.py
+.\.venv\Scripts\python.exe -m pytest -q
+```
+
+See the [SDK guide](docs/sdk.md) for integration examples and execution limits.
 
 ## Architecture
 
@@ -36,6 +45,7 @@ Orqen is an independent proposal, not an AgentArch implementation. No Orqen benc
 ## Project documents
 
 - [Architecture and implementation boundaries](docs/architecture.md)
+- [Python SDK usage](docs/sdk.md)
 - [Controlled evaluation plan](docs/evaluation.md)
 - [Development milestones](docs/roadmap.md)
 

@@ -8,17 +8,17 @@
 
 ## 1. Executable Python SDK prototype
 
-- [ ] Package structure and typed contracts for tools, tasks, results, and traces.
-- [ ] ToolRegistry, transparent TaskAnalyzer, StrategyRouter, and ToolRouter.
-- [ ] Input/output validation and application-owned permissions.
-- [ ] Function execution with task postcondition checks.
-- [ ] Bounded recovery for safe transient failures.
-- [ ] Local examples and behavioral tests covering failures and side effects.
+- [x] Package structure and typed contracts for tools, tasks, results, and traces.
+- [x] ToolRegistry, transparent TaskAnalyzer, StrategyRouter, and ToolRouter.
+- [x] Input/output validation and application-owned permissions.
+- [x] Function execution with task postcondition checks.
+- [x] Bounded recovery for safe transient failures.
+- [x] Local examples and behavioral tests covering failures and side effects.
 
 ## 2. Controlled local experiments
 
 - [ ] Fixed baseline and separate tool/strategy routing configurations.
-- [ ] Dependent-step planning and data flow.
+- [x] Dependent-step ordering and reference-based data flow; plans are application- or adapter-supplied.
 - [ ] Held-out task fixtures, reproducible configurations, and trace export.
 - [ ] Measured results with overhead and failure analysis.
 
