@@ -23,6 +23,7 @@ from .models import (
     Task,
     TransientToolError,
 )
+from .multi_agent import ReviewPlanner
 from .planning import CatalogExpansionRequested, PlanningTransportError
 from .registry import ResultValidator, ToolRegistry
 from .retrieval import CatalogPolicy
@@ -142,20 +143,34 @@ class Orchestrator:
                     if tool.available and tool.permissions <= access.permissions
                 )
                 selected = self.catalog_policy.select(task.goal, catalog)
+                call_cost = 2 if isinstance(self.planner, ReviewPlanner) else 1
                 while True:
-                    if planner_calls >= budget.max_planner_calls or perf_counter() >= deadline:
+                    if (
+                        planner_calls + call_cost > budget.max_planner_calls
+                        or perf_counter() >= deadline
+                    ):
                         return finish(Status.BLOCKED, Failure.BUDGET)
-                    planner_calls += 1
+
+                    def count_call() -> None:
+                        nonlocal planner_calls
+                        planner_calls += 1
+
                     events.append(
                         Event(
                             "catalog_offered",
                             candidates=tuple(tool["name"] for tool in selected),
-                            attempt=planner_calls,
+                            attempt=planner_calls + 1,
                         )
                     )
                     try:
                         async with asyncio.timeout(max(0, deadline - perf_counter())):
-                            plan = await self.planner.plan(task.goal, deepcopy(selected))
+                            if isinstance(self.planner, ReviewPlanner):
+                                plan = await self.planner.plan_counted(
+                                    task.goal, deepcopy(selected), count_call
+                                )
+                            else:
+                                count_call()
+                                plan = await self.planner.plan(task.goal, deepcopy(selected))
                         break
                     except CatalogExpansionRequested:
                         if len(selected) == len(catalog):
@@ -174,7 +189,9 @@ class Orchestrator:
             if override is not None:
                 strategy = Strategy(override)
                 reason = "Explicit strategy configuration"
-            if strategy == Strategy.MULTI_AGENT:
+            if strategy == Strategy.MULTI_AGENT and not (
+                task.plan is None and isinstance(self.planner, ReviewPlanner)
+            ):
                 return finish(Status.BLOCKED, Failure.UNSUPPORTED)
             if (strategy == Strategy.DIRECT and steps) or (
                 strategy == Strategy.FUNCTION and len(steps) > 1

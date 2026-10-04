@@ -103,3 +103,16 @@ The audit also reproduced incorrect final-verification classification: a verifie
 Added an optional Ollama transport to make the provider-neutral planning boundary usable with a configured local server. This is an engineering choice to avoid requiring a paid service for the first live experiment, not a recommendation that local models are more capable. The core remains provider-independent; another provider can implement the same generation callback.
 
 The adapter follows official chat/structured-output documentation and is tested with offline HTTP responses. It records explicit settings and usage without saving prompt contents. No model download or inference was performed during implementation. Selecting a model, recording its immutable version, and evaluating it against fixed baselines remain separate work.
+# October 4 implementation follow-up
+
+The model experiment now has a concrete two-agent proposal/review planner. It uses
+two separate planning invocations and records their actual count. Execution stays
+under the existing central permission and verification boundary. This is an opt-in
+research implementation, not evidence that adding a reviewer improves reasoning.
+
+Live Ollama testing exposed a provider grammar mismatch: unconstrained literal
+schemas produced empty objects. The transport now specializes literal types using
+the offered tools; core validation remains independent. Local Llama testing still
+failed the output-step contract after this change. Do not hide that failure or
+relax the grader to make the experiment pass. See `model-experiments.md`.
+

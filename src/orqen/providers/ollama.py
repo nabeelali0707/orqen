@@ -7,6 +7,7 @@ import hashlib
 import ipaddress
 import json
 import math
+from copy import deepcopy
 from dataclasses import asdict, dataclass
 from time import perf_counter
 from typing import Any
@@ -27,6 +28,51 @@ INSTRUCTIONS = (
 
 class ProviderError(PlanningTransportError):
     """Safe error category; raw provider responses are intentionally excluded."""
+
+
+def provider_schema(request: PlanningRequest) -> dict[str, Any]:
+    """Constrain literal arguments to offered tool types for grammar generation.
+
+    The generic planner schema deliberately accepts arbitrary JSON literals.
+    Some grammar engines generate empty objects for that unconstrained schema.
+    Core plan validation still runs independently after this provider constraint.
+    """
+    schema = deepcopy(request.response_schema)
+    if not request.catalog or "step" not in schema.get("$defs", {}):
+        return schema
+    base = schema["$defs"]["step"]
+    ref = schema["$defs"]["argument"]["oneOf"][1]
+    branches = []
+    for tool in request.catalog:
+        inputs = tool["input_schema"]
+        # Local refs belong to the input schema's document, not the plan schema.
+        # Preserve the generic grammar for schemas that need document rebasing.
+        if '"$ref"' in json.dumps(inputs):
+            return schema
+        step = deepcopy(base)
+        step["properties"]["tool"] = {"const": tool["name"]}
+        step["properties"]["arguments"] = {
+            "type": "object",
+            "properties": {
+                name: {
+                    "oneOf": [
+                        {
+                            "type": "object",
+                            "properties": {"literal": value},
+                            "required": ["literal"],
+                            "additionalProperties": False,
+                        },
+                        deepcopy(ref),
+                    ]
+                }
+                for name, value in inputs.get("properties", {}).items()
+            },
+            "required": inputs.get("required", []),
+            "additionalProperties": inputs.get("additionalProperties", True),
+        }
+        branches.append(step)
+    schema["$defs"]["step"] = {"oneOf": branches}
+    return schema
 
 
 @dataclass(frozen=True)
@@ -117,7 +163,7 @@ class OllamaTransport:
         payload = {
             "model": config.model,
             "stream": False,
-            "format": request.response_schema,
+            "format": provider_schema(request),
             "options": {
                 "temperature": config.temperature,
                 "seed": config.seed,
