@@ -25,6 +25,7 @@ class Status(StrEnum):
 
 class Failure(StrEnum):
     PLAN = "invalid_plan"
+    PLANNER = "planner_transport_error"
     UNSUPPORTED = "unsupported_strategy"
     NO_TOOL = "no_matching_tool"
     UNAVAILABLE = "tool_unavailable"

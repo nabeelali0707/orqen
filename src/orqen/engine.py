@@ -23,7 +23,7 @@ from .models import (
     Task,
     TransientToolError,
 )
-from .planning import CatalogExpansionRequested
+from .planning import CatalogExpansionRequested, PlanningTransportError
 from .registry import ResultValidator, ToolRegistry
 from .retrieval import CatalogPolicy
 from .routing import Planner, StrategyRouter, TaskAnalyzer, ToolRouter, ordered_steps, references
@@ -182,6 +182,8 @@ class Orchestrator:
                 return finish(Status.BLOCKED, Failure.UNSUPPORTED)
         except TimeoutError:
             return finish(Status.BLOCKED, Failure.BUDGET)
+        except PlanningTransportError:
+            return finish(Status.BLOCKED, Failure.PLANNER)
         except Exception:
             return finish(Status.BLOCKED, Failure.PLAN)
 

@@ -97,3 +97,9 @@ An eight-query development fixture found complete prerequisite coverage on six q
 Targeted tests reproduced five avoidable partial-write paths: later missing tools, denied permissions, absent confirmation, invalid literal arguments, and an insufficient minimum call budget. The executor previously discovered these only after earlier calls. Whole-plan preflight now rejects those known defects before invoking any handler. Dynamic checks remain just-in-time because they depend on actual results or changing backend state.
 
 The audit also reproduced incorrect final-verification classification: a verifier exception after a write returned `failed`, and a verifier timeout returned `blocked`. Those cases now return `unknown`. Results and traces record attempted write steps and expose a reconciliation flag on non-successful runs with writes. This prevents callers from confusing a failed goal with a workflow that had no effects. It is not an exactly-once or rollback guarantee.
+
+## Follow-up: a model transport without choosing a research winner
+
+Added an optional Ollama transport to make the provider-neutral planning boundary usable with a configured local server. This is an engineering choice to avoid requiring a paid service for the first live experiment, not a recommendation that local models are more capable. The core remains provider-independent; another provider can implement the same generation callback.
+
+The adapter follows official chat/structured-output documentation and is tested with offline HTTP responses. It records explicit settings and usage without saving prompt contents. No model download or inference was performed during implementation. Selecting a model, recording its immutable version, and evaluating it against fixed baselines remain separate work.

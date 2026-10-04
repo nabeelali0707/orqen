@@ -17,6 +17,10 @@ class CatalogExpansionRequested(Exception):
     """Planner cannot complete a plan with the offered tools; no tools have run."""
 
 
+class PlanningTransportError(Exception):
+    """A provider request failed, rather than returning an invalid plan."""
+
+
 def response_schema(max_steps: int = 20) -> dict[str, Any]:
     return {
         "oneOf": [

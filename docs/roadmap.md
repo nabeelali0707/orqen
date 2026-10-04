@@ -33,7 +33,8 @@ After the independent review, action contracts and independent grading take prio
 
 - [ ] Model adapter and reproducible model settings.
 - [x] Provider-neutral JSON transport adapter, response validation, and planning-call budgets.
-- [ ] Live provider transport with recorded model settings and usage; no live model tested yet.
+- [x] Optional Ollama HTTP transport with explicit model settings, usage records, and offline contract tests.
+- [ ] Live transport/model compatibility check; no live inference tested yet.
 - [ ] AgentArch adapter with documented upstream revision.
 - [ ] Repeated trials and component ablations.
 - [ ] Multi-agent strategy only as an explicit, measurable implementation.
