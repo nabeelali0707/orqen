@@ -24,6 +24,20 @@ The adapter uses `POST /api/chat`, requests nonstreaming structured output, pass
 
 ## Bounds and records
 
+The CLI can preview settings without contacting a model:
+
+```powershell
+.\.venv\isolated\Scripts\python.exe -m orqen.cli demo-ollama --model YOUR_INSTALLED_MODEL --dry-run
+```
+
+With the selected model already installed and its server running, omit `--dry-run` to make one bounded planning request:
+
+```powershell
+.\.venv\isolated\Scripts\python.exe -m orqen.cli demo-ollama --model YOUR_INSTALLED_MODEL --output runs/ollama-demo.json
+```
+
+This command offers only a local addition tool, allows one planning request and one tool invocation, and verifies the expected result. It saves metadata even when the provider fails and exits with code 1 on an unsuccessful check. A direct model answer cannot pass the tool-use check. It does not install models, start a server, or perform business writes. It is a compatibility smoke test, not an evaluation of general reasoning or enterprise task success.
+
 `OllamaConfig` requires an explicit model name and records temperature, seed, generation-token limit, context limit, timeout, and response-byte limit. Defaults are temperature 0, seed 0, 2,048 output tokens, 8,192 context tokens, 60 seconds, and 1 MiB of response JSON. The server's actual behavior and resource use remain outside Orqen's control. Context truncation and schema support vary with the selected model and server version.
 
 `metadata()` contains settings, a system-instruction fingerprint, and per-request status, returned model name, reported token counts, and elapsed time. It excludes goals, prompts, generated plans, raw provider errors, and tool outputs. Missing or malformed token counts remain `None`; cost remains `None`. A model tag is not an immutable version: record the installed model digest and Ollama version before a controlled experiment.

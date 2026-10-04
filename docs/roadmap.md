@@ -35,6 +35,7 @@ After the independent review, action contracts and independent grading take prio
 - [x] Provider-neutral JSON transport adapter, response validation, and planning-call budgets.
 - [x] Optional Ollama HTTP transport with explicit model settings, usage records, and offline contract tests.
 - [ ] Live transport/model compatibility check; no live inference tested yet.
+- [x] Bounded one-call model smoke command with a network-free dry-run mode.
 - [ ] AgentArch adapter with documented upstream revision.
 - [ ] Repeated trials and component ablations.
 - [ ] Multi-agent strategy only as an explicit, measurable implementation.
@@ -45,4 +46,4 @@ After the independent review, action contracts and independent grading take prio
 - [ ] Execution dashboard.
 - [ ] MCP compatibility.
 
-Each major milestone should produce a reviewed diff, relevant passing checks, and a descriptive commit before pushing. A milestone is not complete merely because its interfaces have been scaffolded.
+Each major milestone should produce a reviewed diff, relevant passing checks, and a descriptive local commit. Do not push until the user explicitly authorizes it again. A milestone is not complete merely because its interfaces have been scaffolded. See [the completion plan](completion-plan.md) for remaining work and required owner inputs.

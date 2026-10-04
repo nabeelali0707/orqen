@@ -4,7 +4,7 @@
 
 Orqen is a proposed orchestration engine that helps agents choose an execution strategy, discover relevant tools, validate calls, verify outcomes, and recover from failures within explicit limits.
 
-Orqen includes a working modular Python SDK with deterministic routing, dependency-aware execution, JSON Schema validation, application-owned permissions, task verification, and bounded read recovery. Model providers and multi-agent execution are not bundled yet.
+Orqen includes a working modular Python SDK with deterministic routing, dependency-aware execution, JSON Schema validation, application-owned permissions, task verification, and bounded read recovery. An optional Ollama transport is available with offline contract tests; live model compatibility is not yet verified. Multi-agent execution is not implemented.
 
 The current focus is a small contract-enforcing execution and evaluation layer. The original adaptive-orchestration concept remains a research hypothesis; see the [independent review and revised direction](docs/research-review.md).
 
@@ -51,12 +51,14 @@ Orqen is an independent project, not an AgentArch implementation. Its local faul
 - [Architecture and implementation boundaries](docs/architecture.md)
 - [Python SDK usage](docs/sdk.md)
 - [Structured planning and catalog policies](docs/planning.md)
+- [Optional Ollama model connection](docs/ollama.md)
 - [Controlled evaluation plan](docs/evaluation.md)
 - [Independent research and architecture review](docs/research-review.md)
 - [Measured local fault-suite results](docs/local-results.md)
 - [Catalog coverage results and failures](docs/catalog-results.md)
 - [Development milestones](docs/roadmap.md)
+- [Completion plan and owner inputs](docs/completion-plan.md)
 
 ## Development workflow
 
-Use `orqen` as the project and Python package name. Commit each major completed milestone after its relevant checks pass, then push that commit to GitHub. Keep secrets, local environments, and raw execution data out of Git.
+Use `orqen` as the project and Python package name. Commit each major completed milestone after its relevant checks pass. Current instruction: keep commits local; do not push until explicitly authorized again. Keep secrets, local environments, and raw execution data out of Git.

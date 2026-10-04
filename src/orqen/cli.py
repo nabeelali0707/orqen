@@ -21,7 +21,60 @@ def main() -> None:
     )
     catalog_parser.add_argument("--dataset", type=Path)
     catalog_parser.add_argument("--output", type=Path, default=Path("runs/catalog-evaluation.json"))
+    model_parser = subparsers.add_parser(
+        "demo-ollama", help="Run one bounded local-model smoke test"
+    )
+    model_parser.add_argument("--model", required=True)
+    model_parser.add_argument("--base-url", default="http://127.0.0.1:11434")
+    model_parser.add_argument("--timeout", type=float, default=60.0)
+    model_parser.add_argument("--seed", type=int, default=0)
+    model_parser.add_argument("--max-output-tokens", type=int, default=2048)
+    model_parser.add_argument("--allow-remote", action="store_true")
+    model_parser.add_argument(
+        "--dry-run", action="store_true", help="Show config without inference"
+    )
+    model_parser.add_argument("--output", type=Path, default=Path("runs/ollama-demo.json"))
     args = parser.parse_args()
+    if args.command == "demo-ollama":
+        from .providers.ollama import OllamaConfig, OllamaTransport
+
+        try:
+            config = OllamaConfig(
+                args.model,
+                base_url=args.base_url,
+                seed=args.seed,
+                timeout_seconds=args.timeout,
+                allow_remote=args.allow_remote,
+                max_output_tokens=args.max_output_tokens,
+            )
+        except (ValueError, TypeError):
+            parser.error("Invalid model transport settings; see docs/ollama.md")
+        if args.dry_run:
+            print(
+                json.dumps(
+                    {
+                        "dry_run": True,
+                        "network_requests": 0,
+                        "provider": OllamaTransport(config).metadata(),
+                    },
+                    indent=2,
+                )
+            )
+            return
+        from importlib.util import find_spec
+
+        if find_spec("httpx") is None:
+            parser.error("Install the optional transport with pip install 'orqen[ollama]'")
+        from .demo import run_ollama_demo
+        from .evaluation import write_report
+
+        report = asyncio.run(run_ollama_demo(config))
+        write_report(report, args.output)
+        print(json.dumps(report, indent=2))
+        print(f"Report: {args.output.resolve()}")
+        if not report["passed"]:
+            raise SystemExit(1)
+        return
     if args.command == "evaluate-catalog":
         from .catalog_evaluation import default_dataset, evaluate_catalog
         from .evaluation import write_report

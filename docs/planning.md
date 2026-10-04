@@ -1,6 +1,6 @@
 # Structured planning and catalog retrieval
 
-`JSONPlanner` connects an application-owned async generation function to Orqen's existing executor. It supplies a goal, offered tool metadata, and a response schema. The function returns JSON text. No provider SDK, credential discovery, network request, or paid model invocation is built in.
+`JSONPlanner` connects an application-owned async generation function to Orqen's existing executor. It supplies a goal, offered tool metadata, and a response schema. The function returns JSON text. The core planner makes no provider request itself. An optional [Ollama transport](ollama.md) can supply the generation callback.
 
 Run the offline integration example:
 

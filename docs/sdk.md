@@ -68,7 +68,7 @@ An unavailable unpinned tool can fall back to another registered tool in the sam
 
 ## Model adapters and current limits
 
-You can supply a `Planner` implementing `async plan(goal, catalog) -> Plan`, supply a plan explicitly, or use `JSONPlanner` with an application-owned generation callback. The catalog contains authorized available tool metadata and schemas. Returned plans still pass through the same executor checks. No model provider is bundled; the examples use explicit plans or offline response replay. See [structured planning](planning.md).
+You can supply a `Planner` implementing `async plan(goal, catalog) -> Plan`, supply a plan explicitly, or use `JSONPlanner` with an application-owned generation callback. The catalog contains authorized available tool metadata and schemas. Returned plans still pass through the same executor checks. An optional [Ollama transport](ollama.md) is implemented and tested offline; live inference has not been verified. See [structured planning](planning.md).
 
 Task analysis currently derives complexity and dependencies from the supplied/generated plan and accepts an application-provided risk hint. It does not infer reliable business risk from natural language. Strategy selection chooses direct, function calling, or plan-and-execute according to the plan. Multi-agent execution is explicitly unsupported.
 
