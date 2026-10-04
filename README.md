@@ -62,3 +62,19 @@ Orqen is an independent project, not an AgentArch implementation. Its local faul
 ## Development workflow
 
 Use `orqen` as the project and Python package name. Commit each major completed milestone after its relevant checks pass. Current instruction: keep commits local; do not push until explicitly authorized again. Keep secrets, local environments, and raw execution data out of Git.
+# New research and interface commands
+
+```powershell
+python -m pip install -e '.[dev,research,web,mcp]'
+orqen evaluate-model --model qwen2.5-coder:7b --repetitions 2 --timeout 180
+# Set ORQEN_API_TOKEN to a locally generated random token before serving.
+orqen serve
+orqen mcp --database runs/mcp.sqlite3
+```
+
+The API and dashboard run at <http://127.0.0.1:8080>. See
+[interface setup and deployment limits](docs/interfaces.md),
+[model ablations and proposal/review agents](docs/model-experiments.md), and
+[the pinned AgentArch adapter](docs/agentarch.md). Default product interfaces expose
+a registered addition workflow; real business workflows are configured by the application.
+

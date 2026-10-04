@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Orqen · Execution console</title><link rel="stylesheet" href="/dashboard.css"><script src="/dashboard.js" defer></script></head>
+<body><header><a class="brand" href="/">orqen<span> / execution console</span></a><span class="badge">LOCAL WORKSPACE</span></header>
+<main><section class="intro"><p class="eyebrow">ADAPTIVE AGENT ORCHESTRATOR</p><h1>Execution, with evidence.</h1><p>Run registered workflows and inspect verification, tool calls, and recovery.</p></section>
+<section id="login" class="panel"><h2>Connect to your workspace</h2><p>Your access token stays in this tab’s memory. It is never stored in your browser.</p><form id="connect"><label for="token">Access token</label><input id="token" type="password" autocomplete="off" required minlength="32"><button>Connect</button></form></section>
+<div id="workspace" hidden><div class="toolbar"><span id="connection">Authenticated workspace</span><button id="refresh" class="secondary">Refresh</button><button id="logout" class="secondary">Disconnect</button></div>
+<section class="stats"><article><span>Recent runs</span><strong id="total">0</strong></article><article><span>Verified</span><strong id="verified">0</strong></article><article><span>Needs reconciliation</span><strong id="uncertain">0</strong></article></section>
+<div class="columns"><section class="panel"><p class="eyebrow">NEW EXECUTION</p><h2>Run a workflow</h2><form id="execute"><label for="task">Registered task</label><select id="task"></select><p id="description"></p><label for="inputs">Inputs · JSON</label><textarea id="inputs" rows="7" spellcheck="false">{"a": 2, "b": 3}</textarea><details><summary>Input schema</summary><pre id="schema"></pre></details><button id="run">Execute &amp; verify</button></form><p class="small">Permissions, budgets, and verification are set by the server. Repeated submissions with the same request key do not rerun tools.</p></section>
+<section class="panel"><div class="section-heading"><h2>Execution history</h2><span class="small">Latest 100</span></div><p id="empty">No executions yet. Run a workflow to see its evidence.</p><div id="history"></div></section></div>
+<section class="panel" id="detail-panel" hidden><h2>Run evidence</h2><pre id="detail"></pre></section></div>
+<p id="message" role="status" aria-live="polite"></p><footer>Orqen / Verified outcomes, bounded recovery. Demo workflows are not benchmark results.</footer></main></body></html>

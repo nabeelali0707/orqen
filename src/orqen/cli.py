@@ -34,7 +34,63 @@ def main() -> None:
         "--dry-run", action="store_true", help="Show config without inference"
     )
     model_parser.add_argument("--output", type=Path, default=Path("runs/ollama-demo.json"))
+    trials = subparsers.add_parser("evaluate-model", help="Run bounded local model ablations")
+    trials.add_argument("--model", required=True)
+    trials.add_argument("--repetitions", type=int, default=2)
+    trials.add_argument("--seed", type=int, default=0)
+    trials.add_argument("--timeout", type=float, default=120)
+    trials.add_argument("--output", type=Path, default=Path("runs/model-evaluation.json"))
+    serve = subparsers.add_parser("serve", help="Serve the authenticated API and dashboard")
+    serve.add_argument("--host", default="127.0.0.1")
+    serve.add_argument("--port", type=int, default=8080)
+    serve.add_argument("--database", type=Path, default=Path("runs/service.sqlite3"))
+    mcp = subparsers.add_parser("mcp", help="Serve registered workflows over MCP stdio")
+    mcp.add_argument("--database", type=Path, default=Path("runs/mcp.sqlite3"))
     args = parser.parse_args()
+    if args.command in {"serve", "mcp"}:
+        from .api import Principal
+        from .service import demo_service
+
+        service = demo_service(args.database)
+        if args.command == "mcp":
+            from .mcp_server import create_mcp
+
+            create_mcp(service, Principal("local-mcp")).run(transport="stdio")
+        else:
+            import os
+
+            import uvicorn
+
+            from .api import create_app
+
+            token = os.environ.get("ORQEN_API_TOKEN", "")
+            if len(token) < 32:
+                parser.error("Set ORQEN_API_TOKEN to a randomly generated token of 32+ characters")
+            uvicorn.run(
+                create_app(service, {token: Principal("operator")}),
+                host=args.host,
+                port=args.port,
+                access_log=False,
+                proxy_headers=False,
+            )
+        return
+    if args.command == "evaluate-model":
+        from .evaluation import write_report
+        from .model_evaluation import evaluate_models
+        from .providers.ollama import OllamaConfig
+
+        config = OllamaConfig(
+            args.model, seed=args.seed, timeout_seconds=args.timeout, max_output_tokens=512
+        )
+        report = asyncio.run(evaluate_models(config, repetitions=args.repetitions, seed=args.seed))
+        write_report(report, args.output)
+        print(
+            json.dumps(
+                {"identity_stable": report["identity_stable"], "summaries": report["summaries"]},
+                indent=2,
+            )
+        )
+        return
     if args.command == "demo-ollama":
         from .providers.ollama import OllamaConfig, OllamaTransport
 
