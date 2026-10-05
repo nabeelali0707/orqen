@@ -10,6 +10,8 @@ INSTRUCTIONS = (
     "Include prerequisite steps and dependencies. If necessary tools are missing, "
     'return {"kind": "expand_catalog"}. Do not invent identifiers or facts. '
     "Direct results are allowed only when no tool is needed. Return no markdown."
+    " If the goal specifies a step identifier, copy it exactly without a prefix or suffix."
+    " A proposed plan has not run: do not substitute a computed direct answer for required tools."
 )
 
 

@@ -18,6 +18,26 @@ from .providers.ollama import OllamaConfig, OllamaTransport, ProviderError
 from .registry import ToolRegistry
 from .retrieval import CatalogPolicy
 
+VARIANTS = ("baseline", "retrieval", "no_recovery", "proposal_review")
+
+
+def source_fingerprint() -> str:
+    source = hashlib.sha256()
+    for path in sorted(Path(__file__).parent.rglob("*.py")):
+        source.update(path.relative_to(Path(__file__).parent).as_posix().encode())
+        source.update(path.read_bytes())
+    return source.hexdigest()
+
+
+def arithmetic_checks(outputs: dict, attempts: list) -> dict[str, bool]:
+    """Diagnostic predicates for the synthetic fixture; never expose raw values."""
+    return {
+        "required_tool_called": bool(attempts),
+        "correct_operands": bool(attempts) and all(args == (7, 4) for args in attempts),
+        "exact_output_step": set(outputs) == {"sum"},
+        "correct_value": list(outputs.values()) == [11],
+    }
+
 
 async def model_identity(config: OllamaConfig, *, http_transport: Any = None) -> dict:
     """Record installed model digest and server version without pulling a model."""
@@ -60,15 +80,25 @@ async def evaluate_models(
     repetitions: int = 2,
     seed: int = 0,
     http_transport: Any = None,
+    variants: tuple[str, ...] = VARIANTS,
+    faults: tuple[bool, ...] = (False, True),
 ) -> dict:
     if type(repetitions) is not int or not 1 <= repetitions <= 100:
         raise ValueError("repetitions must be between 1 and 100")
+    if (
+        not variants
+        or len(set(variants)) != len(variants)
+        or any(v not in VARIANTS for v in variants)
+    ):
+        raise ValueError("Choose unique supported variants")
+    if not faults or any(type(f) is not bool for f in faults) or len(set(faults)) != len(faults):
+        raise ValueError("Choose unique boolean fault conditions")
+    initial_source = source_fingerprint()
     identity = await model_identity(config, http_transport=http_transport)
-    variants = ("baseline", "retrieval", "no_recovery", "proposal_review")
     schedule = [
         (variant, fault, trial)
         for trial in range(repetitions)
-        for fault in (False, True)
+        for fault in faults
         for variant in variants
     ]
     random.Random(seed).shuffle(schedule)
@@ -149,20 +179,22 @@ async def evaluate_models(
                 "trial": trial,
                 "trace": result.trace(),
                 "providers": [t.metadata() for t in transports],
+                "checks": arithmetic_checks(result.outputs, attempts),
             }
         )
     final_identity = await model_identity(config, http_transport=http_transport)
-    source = hashlib.sha256()
-    for path in sorted(Path(__file__).parent.rglob("*.py")):
-        source.update(path.relative_to(Path(__file__).parent).as_posix().encode())
-        source.update(path.read_bytes())
+    final_source = source_fingerprint()
     return {
         "schema_version": 1,
         "suite": "live-arithmetic-ablations-v1",
         "evidence": "Local synthetic model experiment; not AgentArch or held-out research evidence",
         "identity": identity,
         "identity_stable": identity == final_identity,
-        "source_sha256": source.hexdigest(),
+        "source_sha256": initial_source,
+        "source_sha256_after": final_source,
+        "source_stable": initial_source == final_source,
+        "variants": list(variants),
+        "faults": list(faults),
         "order_seed": seed,
         "repetitions": repetitions,
         "rows": rows,

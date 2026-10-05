@@ -130,3 +130,13 @@ The previous local Qwen ablation run completed with zero verified tasks out of
 established reliable task performance. Preserve the outcome checks and record the
 failure counts in `model-results.md`; investigate failures before expanding the
 experiment or making a claim that a reviewer or retrieval helps.
+
+## October 5: diagnose contract failures without changing the target
+
+Existing call events identify an output-step naming mismatch in single-planner
+runs and tool omission in review runs. Add separate boolean diagnostics for tool
+use, operands, naming and value, while retaining the original verification rule.
+Explicit prompt reminders are hypotheses to test, not evidence of better reasoning.
+Allow a smaller selection of ablations before repeating the full experiment.
+Record source fingerprints at both boundaries, while requiring immutable code for
+publication. Current validation is offline only at the user's request.

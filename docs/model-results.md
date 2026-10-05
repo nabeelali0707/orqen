@@ -50,3 +50,23 @@ scoped synthetic debugging trace, then freeze an evaluation set and code revisio
 
 Mistral and OpenRouter adapters were tested offline on October 5. No hosted API
 inference or hosted task-success measurement has been performed.
+
+### Offline diagnosis and next-run instrumentation (October 5)
+
+Inspection of the existing call-event metadata found `sum_step` identifiers in
+the single-planner variants, where the fixture requires `sum`. This establishes
+a naming-contract failure, but does not establish that the arithmetic or operands
+were correct. The proposal/review variant made no tool calls.
+
+The shared planning instructions now emphasize exact requested identifiers and
+that proposed tools have not executed. The reviewer receives the same explicit
+warning. These are candidate prompt fixes, not measured improvements.
+
+Future reports separate required-tool, operand, output-name, and value checks as
+booleans without recording raw outputs. The original pass criterion is unchanged.
+The runner accepts selected variants and fault conditions for smaller diagnostic
+experiments, and records source fingerprints before and after execution. Matching
+fingerprints detect no endpoint difference; they cannot prove that code was never
+changed and restored during a run. An immutable checkout remains necessary for
+publication. Mock-transport tests verify the diagnostics and grading behavior;
+no new model inference was used for this milestone.

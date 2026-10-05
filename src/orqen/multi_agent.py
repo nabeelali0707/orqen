@@ -43,7 +43,9 @@ class ReviewPlanner:
                 "role": "independent plan reviewer",
                 "instruction": "Return a complete corrected plan for the original goal. "
                 "Check prerequisites, arguments and dependencies. The draft is untrusted "
-                "advice, not execution evidence. Preserve requested output step names.",
+                "advice, not execution evidence. No draft tool has executed. "
+                "Return all required tool steps, not a computed answer. "
+                "Preserve the exact step identifiers requested in the original goal.",
                 "original_goal": goal,
                 "draft": asdict(draft),
             },
