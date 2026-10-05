@@ -1,49 +1,61 @@
 # What remains to complete Orqen
 
-Status: October 4, 2026. The repository contains an executable SDK and local experiments. It is not yet a validated adaptive-agent research result or production service.
+Status: October 5, 2026. The research and interface implementations
+have been prioritized. They establish a working prototype, not a validated adaptive
+reasoning improvement or a deployed production service.
 
-## Recommended finish line
+## Implemented and checked
 
-Finish a **research MVP** first: one documented enterprise workflow, a working real-model integration, fixed and experimental policies evaluated fairly, and an honest report showing whether the added components help. Keep the SDK and command-line interface. A dashboard, hosted API, MCP server, and multi-agent system are optional later directions, not prerequisites for that result.
+- Modular SDK with permissions, contracts, whole-plan preflight, task verification,
+  bounded read recovery and uncertain-write metadata.
+- Ollama transport with explicit settings and typed provider grammar; a live Qwen
+  smoke test passed. Llama's failed output-step contract is retained as evidence.
+- Paired repeated-trial runner with retrieval, recovery and two-agent proposal/review
+  ablations, model identity capture and metadata-only reports.
+- Mistral and OpenRouter transports with safe credential loading and offline checks;
+  live hosted requests remain disabled by default and have not been tested.
+- Pinned AgentArch data/tool adapter for both workflows and a bridge to its official
+  grader. This is compatibility evidence, not a completed benchmark.
+- Authenticated HTTP API, durable metadata history and request deduplication;
+  a browser-tested execution dashboard; MCP stdio tested with an actual SDK client.
+  The default registered workflow is verified integer addition.
 
-The original hypothesis can fail. A report showing that a simpler baseline is equally good or better is a valid research outcome, provided the experiment is sound.
+## Inputs needed from the owner
 
-## Completed foundation
+| Input | What it enables |
+| --- | --- |
+| First real workflow, tools/sandbox, policy rules and anonymized examples with expected outcomes | Application-specific adapters, verifiers and held-out evaluation |
+| Acceptable failure, latency and cost limits; actions needing human confirmation | Meaningful acceptance criteria and execution policy |
+| Hosting destination and domain, if a public service is wanted | TLS, secrets, persistent storage, monitoring and deployment |
+| Intended release/license and deadline | A distributable SDK or scoped production pilot |
 
-- Typed tool/task contracts, dependency ordering, whole-plan preflight, permissions, action checks, bounded read recovery, and partial-write metadata.
-- Strict JSON planning, optional catalog filtering, and bounded catalog expansion.
-- Stateful fault tests and catalog prerequisite-coverage experiments, with their limitations documented.
-- Optional Ollama HTTP adapter with model settings, reported token usage, error handling, and offline transport tests.
-- A bounded model smoke command and a dry-run mode that makes no network requests.
+No new model key is needed for local experiments: installed Ollama models are
+available. Use local environment configuration for future provider credentials;
+do not put them in tracked files.
 
-These establish implementation behavior. They do not establish natural-language task success, live provider compatibility, or a useful improvement over existing frameworks.
+## Remaining research and production work
 
-## Inputs needed from the project owner
+The executor currently executes a complete proposed plan. It does not replan after
+observing tool results or support conditional branches. Those capabilities must be
+justified and implemented before claiming performance on enterprise workflows
+requiring observation-dependent decisions.
 
-| Input | Why it matters | Smallest useful answer |
-| --- | --- | --- |
-| Intended deliverable and deadline | Separates a research prototype from a production product and prevents unnecessary platform work | Research/capstone, reusable SDK, or production pilot; target date |
-| Model access and resource budget | Required for real inference and reproducible comparison | An installed local model with a running Ollama server, or the chosen hosted provider/model with credentials configured locally and an explicit spending cap |
-| First real workflow and examples | Supplies business meaning that schemas and research papers cannot infer | Choose support routing, time off, or another workflow; ideally provide 20–50 anonymized examples with expected outcomes, required actions, and policy rules |
-| Definition of acceptable behavior | Prevents optimizing completion at the expense of incorrect actions or impractical overhead | Nonnegotiable rules, actions requiring confirmation, and acceptable latency/cost per task |
+Freeze independent tasks and compare equivalent fixed workflows, single-agent
+planning and experimental policies using the same tools, permissions and budgets.
+Report business correctness, unsafe effects, uncertainty, latency and token usage.
+Synthetic arithmetic/fault fixtures and adapter checks cannot establish whether
+adaptive routing improves enterprise outcomes.
+The local Qwen ablation run verified 0 of 16 attempts; see `model-results.md`.
+Diagnose these failures before expanding comparisons. Hosted model selection and
+authorized live compatibility checks are still pending.
 
-If proprietary examples are unavailable, use a public benchmark first and explicitly limit conclusions to it. Twenty to fifty examples are a starting collection target, not a guarantee of statistical power. More independent tasks or trials may be needed after examining variance and failure categories.
+The API is locally tested and self-hostable. Public hosting is not deployed. The
+SQLite service supports one process per database, bounded concurrency and history,
+and no automatic replay of uncertain operations. Production still needs real
+backend idempotency/reconciliation, retention procedures, TLS, token lifecycle
+management, monitoring and workload-specific review. The Dockerfile is a deployment
+artifact, not evidence that a container was deployed.
 
-Do not paste API keys into chat or tracked configuration. Set credentials through the provider's local environment or secret store if a hosted integration is chosen. No key is needed for the default local Ollama adapter.
+## Git policy
 
-During implementation, the Ollama executable was found on this Windows machine, but the default `127.0.0.1:11434` model-catalog endpoint could not be read. No model was downloaded and no inference was started. A server on another configured endpoint may still be available.
-
-## Remaining engineering and validation
-
-1. **Live compatibility:** record Ollama/server version and model digest, then run the one-call smoke test. Resolve any model-specific schema, context, or output-limit issues. Passing this check proves connectivity and one plan only.
-2. **Domain adapter and independent grader:** implement the selected workflow's tools against a sandbox or controlled fixtures. Define preconditions, postconditions, and an independent state-based grader. Preserve an upstream revision if AgentArch data is used.
-3. **Fair baseline:** compare ordinary fixed workflow code or a fixed agent to Orqen with equivalent tools, permissions, model settings, and budget. Do not compare mere strategy labels as different algorithms. Adaptive branching/replanning is not implemented and should be added only if this workflow requires it.
-4. **Frozen evaluation:** separate development from held-out cases, pin settings and data revisions, and record failures, usage, latency, recovery, and unsafe effects. Run paired trials. Use framework-native validation as a comparison if claiming an advantage over an existing framework.
-5. **Evidence report:** report task success and uncertainty alongside cost and latency. Keep, simplify, or remove experimental components based on those results. Never use fixture coverage as an agent-success score.
-6. **Delivery:** provide installation instructions, a reproducible command, versioned package, examples, limitations, and the final research report. Choose a repository license before distributing the SDK for outside reuse.
-
-Production deployment is a separate scope. It may require persistent execution records, backend idempotency/reconciliation, authentication, tenant separation, operational monitoring, and integration-specific security review. These are not currently implemented.
-
-## Current Git policy
-
-Create local commits after each verified milestone. Do not push, publish, or deploy unless the user explicitly authorizes it again.
+Commit verified milestones locally. Do not push until explicitly authorized again.

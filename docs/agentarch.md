@@ -40,6 +40,10 @@ data, so store it only under ignored `runs/`.
 Validated locally: both datasets loaded; a finish-only compatibility trace was
 accepted by the actual upstream grader and returned its 22 metric fields. This
 was **not a model benchmark run**, and is not reported as task success.
+An October 5 cross-check also matched all 38 non-finish tool responses for case 1
+across both workflows against the upstream mock registry. On Windows, invoke the
+upstream Python process with `-X utf8`: its default-encoding JSON loader can otherwise
+decode Unicode mock text differently. Orqen reads these pinned inputs as UTF-8.
 The current whole-plan SDK has no observation-driven replanning loop, so this
 adapter alone does not establish that it can solve conditional enterprise workflows.
 Proposal/review planning is also not equivalent to AgentArch's orchestrator modes.

@@ -31,19 +31,22 @@ After the independent review, action contracts and independent grading take prio
 
 ## 3. Research integration
 
-- [ ] Model adapter and reproducible model settings.
+- [x] Model adapter, explicit settings, model digest and server-version capture.
 - [x] Provider-neutral JSON transport adapter, response validation, and planning-call budgets.
 - [x] Optional Ollama HTTP transport with explicit model settings, usage records, and offline contract tests.
-- [ ] Live transport/model compatibility check; no live inference tested yet.
+- [x] Mistral/OpenRouter transports, explicit credential loading, request limits and offline tests.
+- [ ] Hosted provider live compatibility and model selection; credentials have not been used.
+- [x] Live compatibility check: Qwen passed; Llama contract failure is retained in the evidence report.
 - [x] Bounded one-call model smoke command with a network-free dry-run mode.
-- [ ] AgentArch adapter with documented upstream revision.
-- [ ] Repeated trials and component ablations.
-- [ ] Multi-agent strategy only as an explicit, measurable implementation.
+- [x] AgentArch data/tool/grading adapter pinned to an upstream revision; both use cases validated.
+- [x] Repeated-trial runner and live local ablation run; 0/16 verified outcomes are recorded in [model results](model-results.md).
+- [x] Concrete proposal/review agents with independently counted planning calls and enforced budgets.
 
 ## 4. Product interfaces, subject to evidence
 
-- [ ] Hosted API and authentication.
-- [ ] Execution dashboard.
-- [ ] MCP compatibility.
+- [x] Self-hostable API and bearer authentication, exercised over local HTTP.
+- [ ] Public deployment: hosting destination, domain/TLS and production configuration still required.
+- [x] Execution dashboard with authenticated workflows, history, and verification evidence; browser-tested.
+- [x] MCP stdio server using the official SDK; tested with a real MCP client.
 
 Each major milestone should produce a reviewed diff, relevant passing checks, and a descriptive local commit. Do not push until the user explicitly authorizes it again. A milestone is not complete merely because its interfaces have been scaffolded. See [the completion plan](completion-plan.md) for remaining work and required owner inputs.

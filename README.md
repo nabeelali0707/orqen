@@ -4,7 +4,7 @@
 
 Orqen is a proposed orchestration engine that helps agents choose an execution strategy, discover relevant tools, validate calls, verify outcomes, and recover from failures within explicit limits.
 
-Orqen includes a working modular Python SDK with deterministic routing, dependency-aware execution, JSON Schema validation, application-owned permissions, task verification, and bounded read recovery. An optional Ollama transport is available with offline contract tests; live model compatibility is not yet verified. Multi-agent execution is not implemented.
+Orqen includes a working modular Python SDK with deterministic routing, dependency-aware execution, JSON Schema validation, application-owned permissions, task verification, and bounded read recovery. The Ollama transport has passed a live Qwen smoke test. An opt-in proposal/review planner makes two measured agent calls. An authenticated API, dashboard, and MCP stdio server expose registered workflows.
 
 The current focus is a small contract-enforcing execution and evaluation layer. The original adaptive-orchestration concept remains a research hypothesis; see the [independent review and revised direction](docs/research-review.md).
 
@@ -52,6 +52,8 @@ Orqen is an independent project, not an AgentArch implementation. Its local faul
 - [Python SDK usage](docs/sdk.md)
 - [Structured planning and catalog policies](docs/planning.md)
 - [Optional Ollama model connection](docs/ollama.md)
+- [Mistral and OpenRouter setup and offline preview](docs/hosted-providers.md)
+- [Measured local model outcomes](docs/model-results.md)
 - [Controlled evaluation plan](docs/evaluation.md)
 - [Independent research and architecture review](docs/research-review.md)
 - [Measured local fault-suite results](docs/local-results.md)
@@ -62,7 +64,7 @@ Orqen is an independent project, not an AgentArch implementation. Its local faul
 ## Development workflow
 
 Use `orqen` as the project and Python package name. Commit each major completed milestone after its relevant checks pass. Current instruction: keep commits local; do not push until explicitly authorized again. Keep secrets, local environments, and raw execution data out of Git.
-# New research and interface commands
+## New research and interface commands
 
 ```powershell
 python -m pip install -e '.[dev,research,web,mcp]'
@@ -77,4 +79,3 @@ The API and dashboard run at <http://127.0.0.1:8080>. See
 [model ablations and proposal/review agents](docs/model-experiments.md), and
 [the pinned AgentArch adapter](docs/agentarch.md). Default product interfaces expose
 a registered addition workflow; real business workflows are configured by the application.
-

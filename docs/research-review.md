@@ -103,7 +103,7 @@ The audit also reproduced incorrect final-verification classification: a verifie
 Added an optional Ollama transport to make the provider-neutral planning boundary usable with a configured local server. This is an engineering choice to avoid requiring a paid service for the first live experiment, not a recommendation that local models are more capable. The core remains provider-independent; another provider can implement the same generation callback.
 
 The adapter follows official chat/structured-output documentation and is tested with offline HTTP responses. It records explicit settings and usage without saving prompt contents. No model download or inference was performed during implementation. Selecting a model, recording its immutable version, and evaluating it against fixed baselines remain separate work.
-# October 4 implementation follow-up
+## October 4 implementation follow-up
 
 The model experiment now has a concrete two-agent proposal/review planner. It uses
 two separate planning invocations and records their actual count. Execution stays
@@ -116,3 +116,17 @@ the offered tools; core validation remains independent. Local Llama testing stil
 failed the output-step contract after this change. Do not hide that failure or
 relax the grader to make the experiment pass. See `model-experiments.md`.
 
+## October 5: hosted provider boundary
+
+Mistral and OpenRouter now share a bounded HTTP transport with explicit provider
+wire settings. The initial interface uses JSON object mode plus independent core
+schema validation. This avoids assuming that every hosted model accepts the same
+strict JSON Schema subset. Unsupported responses stop the run; the adapter does
+not silently change formats, retry or select another model. Live inference is
+disabled by default. Offline contract tests are implementation evidence only.
+
+The previous local Qwen ablation run completed with zero verified tasks out of
+16 attempts. That contradicts any inference that its earlier one-case smoke pass
+established reliable task performance. Preserve the outcome checks and record the
+failure counts in `model-results.md`; investigate failures before expanding the
+experiment or making a claim that a reviewer or retrieval helps.

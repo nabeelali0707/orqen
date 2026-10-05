@@ -2,9 +2,9 @@
 
 ## Core boundary
 
-The Python SDK mediates between an application, a model adapter, and registered tools. Core decisions and trace formats should remain independent of a model provider. A hosted API, dashboard, and MCP integration are later interfaces over the same engine.
+The Python SDK mediates between an application, a model adapter, and registered tools. Core decisions and trace formats should remain independent of a model provider. An authenticated API, dashboard, and MCP stdio server now expose registered workflows through the same execution service.
 
-The table describes the target design. The SDK implements explicit plans, metadata-based strategy labels, optional capability-constrained lexical tool ranking, validation, sequential async execution, action contracts, verification, and conservative read recovery. Natural-language risk analysis, learned retrieval, and multi-agent execution remain future work. The [independent review](research-review.md) supersedes assumptions that these modules each require a separate intelligent subsystem. See [the SDK guide](sdk.md) for exact behavior and limits.
+The table describes the target design. The SDK implements explicit plans, metadata-based strategy labels, optional capability-constrained lexical tool ranking, validation, sequential async execution, action contracts, verification, and conservative read recovery. Natural-language risk analysis and learned retrieval remain future work. An opt-in proposal/review planner now makes two separate agent calls before central execution. The [independent review](research-review.md) supersedes assumptions that these modules each require a separate intelligent subsystem. See [the SDK guide](sdk.md) for exact behavior and limits.
 
 | Component | Input | Output and responsibility |
 | --- | --- | --- |
@@ -19,7 +19,7 @@ The table describes the target design. The SDK implements explicit plans, metada
 
 ## Strategy policy
 
-Begin with transparent rules. A direct response uses no tools. Function calling handles a bounded tool interaction. Plan-and-execute handles dependent steps with explicit intermediate results. Multi-agent execution is a later experimental strategy for separable specialist work, with coordination cost included in evaluation.
+Begin with transparent rules. A direct response uses no tools. Function calling handles a bounded tool interaction. Plan-and-execute handles dependent steps with explicit intermediate results. The experimental proposal/review strategy invokes separate proposing and reviewing planners, counts both calls, and retains central execution checks. See model-experiments.md for its limits.
 
 Do not silently label sequential calls as multi-agent execution. Expose supported strategies explicitly, and report unsupported requests. Model recommendations do not grant permissions or bypass validation.
 
