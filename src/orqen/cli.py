@@ -34,6 +34,20 @@ def main() -> None:
         "--dry-run", action="store_true", help="Show config without inference"
     )
     model_parser.add_argument("--output", type=Path, default=Path("runs/ollama-demo.json"))
+    hosted = subparsers.add_parser(
+        "demo-hosted", help="Preview or explicitly run a hosted smoke test"
+    )
+    hosted.add_argument("--provider", required=True, choices=("mistral", "openrouter"))
+    hosted.add_argument("--model", required=True)
+    hosted.add_argument("--seed", type=int, default=0)
+    hosted.add_argument("--max-output-tokens", type=int, default=512)
+    hosted.add_argument("--timeout", type=float, default=60.0)
+    hosted.add_argument("--routing-provider")
+    hosted.add_argument("--env-file", type=Path, help="Read credentials from this file explicitly")
+    hosted.add_argument("--output", type=Path, default=Path("runs/hosted-demo.json"))
+    mode = hosted.add_mutually_exclusive_group()
+    mode.add_argument("--live", action="store_true", help="Enable one potentially billable request")
+    mode.add_argument("--dry-run", action="store_true", help="Default: preview without a request")
     trials = subparsers.add_parser("evaluate-model", help="Run bounded local model ablations")
     trials.add_argument("--model", required=True)
     trials.add_argument("--repetitions", type=int, default=2)
@@ -47,6 +61,52 @@ def main() -> None:
     mcp = subparsers.add_parser("mcp", help="Serve registered workflows over MCP stdio")
     mcp.add_argument("--database", type=Path, default=Path("runs/mcp.sqlite3"))
     args = parser.parse_args()
+    if args.command == "demo-hosted":
+        from .providers.hosted import HostedConfig, HostedTransport, load_api_key
+
+        try:
+            config = HostedConfig(
+                args.provider,
+                args.model,
+                seed=args.seed,
+                max_output_tokens=args.max_output_tokens,
+                timeout_seconds=args.timeout,
+                routing_provider=args.routing_provider,
+            )
+        except (ValueError, TypeError):
+            parser.error("Invalid hosted provider settings; see docs/hosted-providers.md")
+        try:
+            api_key = load_api_key(args.provider, env_file=args.env_file)
+        except ValueError:
+            api_key = None
+        if not args.live:
+            print(
+                json.dumps(
+                    {
+                        "dry_run": True,
+                        "network_requests": 0,
+                        "credential_configured": api_key is not None,
+                        "provider": HostedTransport(config).metadata(),
+                    },
+                    indent=2,
+                )
+            )
+            return
+        if api_key is None:
+            parser.error("Provider credential is missing or invalid; use environment or --env-file")
+        from importlib.util import find_spec
+
+        if find_spec("httpx") is None:
+            parser.error("Install the optional transport with pip install 'orqen[hosted]'")
+        from .demo import run_hosted_demo
+        from .evaluation import write_report
+
+        report = asyncio.run(run_hosted_demo(config, api_key=api_key, allow_live=True))
+        write_report(report, args.output)
+        print(json.dumps(report, indent=2))
+        if not report["passed"]:
+            raise SystemExit(1)
+        return
     if args.command in {"serve", "mcp"}:
         from .api import Principal
         from .service import demo_service
