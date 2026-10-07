@@ -37,7 +37,9 @@ Fix the model and version, tasks, tool implementations, permissions, information
 
 Start with deterministic local fixtures: a direct-response task, a single tool call, dependent reads, a transient read failure, invalid arguments, denied access, an ambiguous write timeout, and a failed business postcondition. Add irrelevant tools to measure retrieval coverage and selection behavior.
 
-Then build an AgentArch adapter following the official benchmark setup and evaluation rules. Preserve task definitions and graders; record the upstream revision and any deviations. The adapter and benchmark runs are future work.
+The pinned AgentArch adapter is implemented and compatibility-tested. Benchmark
+runs remain pending. Preserve task definitions and official graders; record the
+upstream revision and any deviations. See `agentarch.md`.
 
 ## Metrics
 
@@ -59,4 +61,6 @@ Use repeated trials for stochastic models. Publish trial counts, failure categor
 
 - Verified source: [AgentArch paper](https://arxiv.org/abs/2509.10769) and [official code](https://github.com/ServiceNow/AgentArch).
 - Relevant related-work sources were verified in the [independent review](research-review.md); their results do not transfer automatically to Orqen.
-- The local fault suite has run; its results establish only fixture behavior. No AgentArch or real model comparison has run.
+- The local fault and conditional-workflow suites establish fixture behavior only.
+- A local Qwen arithmetic ablation run verified 0/16 tasks; see `model-results.md`.
+  No AgentArch model benchmark or held-out enterprise comparison has run.

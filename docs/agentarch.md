@@ -44,8 +44,9 @@ An October 5 cross-check also matched all 38 non-finish tool responses for case 
 across both workflows against the upstream mock registry. On Windows, invoke the
 upstream Python process with `-X utf8`: its default-encoding JSON loader can otherwise
 decode Unicode mock text differently. Orqen reads these pinned inputs as UTF-8.
-The current whole-plan SDK has no observation-driven replanning loop, so this
-adapter alone does not establish that it can solve conditional enterprise workflows.
+The SDK now supports application-owned observation-driven stages through
+`WorkflowRunner`; this adapter alone still does not establish that a model can
+solve conditional enterprise workflows.
 Proposal/review planning is also not equivalent to AgentArch's orchestrator modes.
 
 Set `ORQEN_AGENTARCH_CHECKOUT` to the pinned checkout to run the optional integration

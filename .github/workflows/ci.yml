@@ -25,8 +25,8 @@ jobs:
           repository: ServiceNow/AgentArch
           ref: dfdd9cd69642f74d7f2c72738c96faff7b70e59f
           path: runs/upstream/AgentArch
-      - run: ruff check src tests examples
-      - run: ruff format --check src tests examples
+      - run: ruff check src tests examples scripts
+      - run: ruff format --check src tests examples scripts
       - run: python -m pytest -q
         env:
           ORQEN_AGENTARCH_CHECKOUT: runs/upstream/AgentArch
@@ -38,3 +38,5 @@ jobs:
       - run: python -m orqen.cli demo-ollama --model offline-placeholder --dry-run
       - run: python -m orqen.cli demo-hosted --provider mistral --model offline-placeholder --dry-run
       - run: python -m orqen.cli demo-hosted --provider openrouter --model offline-placeholder --dry-run
+      - run: python -m pip wheel . --no-deps --wheel-dir dist
+      - run: python scripts/check_wheel.py dist/*.whl
