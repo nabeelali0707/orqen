@@ -18,6 +18,8 @@ python -m venv .venv
 ```
 
 See the [SDK guide](docs/sdk.md) for integration examples and execution limits.
+Use [observation-driven workflows](docs/workflows.md) to select subsequent tasks
+from verified tool results under a shared budget.
 
 ## Architecture
 

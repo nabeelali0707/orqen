@@ -140,3 +140,13 @@ Explicit prompt reminders are hypotheses to test, not evidence of better reasoni
 Allow a smaller selection of ablations before repeating the full experiment.
 Record source fingerprints at both boundaries, while requiring immutable code for
 publication. Current validation is offline only at the user's request.
+
+## October 7: bounded observation-driven application control
+
+Add a staged runner around the existing executor instead of replacing it with an
+unrestricted agent loop. Trusted application code selects the next task from
+verified observations. Budgets span stages, permissions remain centralized, failed
+stages stop, and final business verification is independent of stage success.
+This supports conditional workflows without claiming that an LLM reasons better.
+Model-directed replanning can be investigated through task planners within this
+boundary; no automatic replay or durable workflow claim is made.

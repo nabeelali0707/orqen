@@ -21,6 +21,7 @@ from .planning import CatalogExpansionRequested, JSONPlanner, PlanningRequest
 from .registry import ResultValidator, ToolRegistry
 from .retrieval import CatalogPolicy
 from .routing import Planner, StrategyRouter, TaskAnalyzer, ToolRouter
+from .workflow import WorkflowResult, WorkflowRunner
 
 __all__ = [
     "Access",
@@ -48,4 +49,6 @@ __all__ = [
     "ToolRegistry",
     "ToolRouter",
     "TransientToolError",
+    "WorkflowResult",
+    "WorkflowRunner",
 ]
