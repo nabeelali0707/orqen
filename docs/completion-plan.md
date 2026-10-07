@@ -1,6 +1,6 @@
 # What remains to complete Orqen
 
-Status: October 5, 2026. The research and interface implementations
+Status: October 7, 2026. The research and interface implementations
 have been prioritized. They establish a working prototype, not a validated adaptive
 reasoning improvement or a deployed production service.
 
@@ -35,10 +35,11 @@ do not put them in tracked files.
 
 ## Remaining research and production work
 
-The executor currently executes a complete proposed plan. It does not replan after
-observing tool results or support conditional branches. Those capabilities must be
-justified and implemented before claiming performance on enterprise workflows
-requiring observation-dependent decisions.
+The executor executes a complete proposed plan per stage. `WorkflowRunner` now
+supports application-owned selection of subsequent tasks from verified observations,
+with shared budgets and independent final verification. The conditional returns
+sandbox validates this mechanism under synthetic faults. Model-directed replanning
+and performance on real observation-dependent enterprise tasks remain unvalidated.
 
 Freeze independent tasks and compare equivalent fixed workflows, single-agent
 planning and experimental policies using the same tools, permissions and budgets.

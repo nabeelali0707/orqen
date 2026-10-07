@@ -20,6 +20,8 @@ python -m venv .venv
 See the [SDK guide](docs/sdk.md) for integration examples and execution limits.
 Use [observation-driven workflows](docs/workflows.md) to select subsequent tasks
 from verified tool results under a shared budget.
+The [conditional returns sandbox](docs/return-workflow.md) demonstrates independent
+ledger verification, policy checks and uncertain-write handling without a network.
 
 ## Architecture
 

@@ -31,6 +31,7 @@ jobs:
         env:
           ORQEN_AGENTARCH_CHECKOUT: runs/upstream/AgentArch
       - run: python examples/customer_workflow.py
+      - run: python examples/returns_workflow.py
       - run: python -m orqen.cli evaluate --repetitions 1
       - run: python examples/structured_planner.py
       - run: python -m orqen.cli evaluate-catalog
