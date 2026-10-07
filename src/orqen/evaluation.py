@@ -5,9 +5,11 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import platform
 import random
 import statistics
+import tempfile
 from collections import Counter
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, replace
@@ -300,8 +302,22 @@ async def evaluate(*, repetitions: int = 3, seed: int = 0) -> dict[str, Any]:
 
 
 def write_report(report: dict[str, Any], path: Path) -> None:
+    """Replace a report atomically, retaining the previous checkpoint on failure."""
+    payload = json.dumps(report, indent=2, allow_nan=False) + "\n"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=path.parent, prefix=f".{path.name}.", delete=False
+        ) as stream:
+            temporary = Path(stream.name)
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 
 def write_traces(report: dict[str, Any], path: Path) -> None:

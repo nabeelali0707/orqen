@@ -121,3 +121,63 @@ def test_source_change_invalidates_reproducibility(monkeypatch):
         )
     )
     assert not report["source_stable"]
+
+
+def test_final_identity_failure_preserves_rows_and_does_not_claim_stability(tmp_path):
+    identity_requests = 0
+
+    def disappearing(request):
+        nonlocal identity_requests
+        if request.url.path == "/api/version":
+            identity_requests += 1
+            if identity_requests > 1:
+                raise httpx.ConnectError("private provider details", request=request)
+        return handler(request)
+
+    output = tmp_path / "report.json"
+    report = asyncio.run(
+        evaluate_models(
+            OllamaConfig("test"),
+            repetitions=1,
+            variants=("baseline",),
+            faults=(False,),
+            checkpoint=output,
+            http_transport=httpx.MockTransport(disappearing),
+        )
+    )
+    assert report["report_status"] == "identity_unavailable"
+    assert report["identity_stable"] is None and report["completed_runs"] == 1
+    assert report["rows"][0]["trace"]["verified"]
+    assert json.loads(output.read_text()) == json.loads(json.dumps(report))
+    assert "private provider details" not in output.read_text()
+
+
+def test_cancellation_leaves_completed_trial_checkpoint(tmp_path):
+    output = tmp_path / "report.json"
+    calls = 0
+
+    def interrupted(request):
+        nonlocal calls
+        if request.url.path == "/api/chat":
+            calls += 1
+            if calls == 2:
+                saved = json.loads(output.read_text())
+                assert saved["completed_runs"] == 1
+                assert saved["report_status"] == "running"
+                raise asyncio.CancelledError()
+        return handler(request)
+
+    with pytest.raises(asyncio.CancelledError):
+        asyncio.run(
+            evaluate_models(
+                OllamaConfig("test"),
+                repetitions=2,
+                variants=("baseline",),
+                faults=(False,),
+                checkpoint=output,
+                http_transport=httpx.MockTransport(interrupted),
+            )
+        )
+    saved = json.loads(output.read_text())
+    assert saved["completed_runs"] == 1 and saved["scheduled_runs"] == 2
+    assert saved["identity_stable"] is None

@@ -70,3 +70,19 @@ fingerprints detect no endpoint difference; they cannot prove that code was neve
 changed and restored during a run. An immutable checkout remains necessary for
 publication. Mock-transport tests verify the diagnostics and grading behavior;
 no new model inference was used for this milestone.
+
+### October 7 operational attempt
+
+A two-attempt Qwen diagnostic schedule (baseline and proposal/review, no injected
+fault, one trial, 240-second request limit) was started from package source at
+commit `1c8e403`. Local prompt processing was slow and coincided with substantial
+slowdown of other validation processes. The validation-owned Ollama process was
+stopped. The runner then failed its final identity query before saving the report.
+No trustworthy per-trial outcome report survived, so this attempt contributes no
+success-rate measurement and does not validate the prompt changes.
+
+This exposed a reporting defect: completed rows were lost when the final identity
+check raised. The runner now checkpoints each completed attempt and preserves rows
+with unknown identity stability when that final query fails. Offline tests cover
+server disappearance, cancellation and failed atomic report replacement. These
+fixes cannot reconstruct the missing outcomes from the earlier attempt.

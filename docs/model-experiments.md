@@ -10,6 +10,24 @@ The model identity is checked before and after the experiment. A changed identit
 invalidates a comparison. Seeds/settings aid reproducibility but cannot guarantee
 bitwise deterministic inference across hardware and server versions.
 
+For a smaller diagnostic schedule, preview before running:
+
+```sh
+orqen evaluate-model --model qwen2.5-coder:7b --repetitions 1 --variants baseline proposal_review --faults none --dry-run
+```
+
+The preview makes no network requests. Remove `--dry-run` to execute the selected
+local model schedule. `--faults` accepts `none`, `transient`, or `both`; selection
+does not change the original grader. CLI runs checkpoint metadata atomically before
+the first attempt and after every completed attempt. SDK callers can pass
+`checkpoint=Path(...)` to `evaluate_models` for the same behavior.
+
+An interrupted checkpoint has `report_status: running`; do not treat its partial
+denominator as the complete schedule. If the final identity query fails, completed
+rows remain available with `report_status: identity_unavailable` and
+`identity_stable: null`. The CLI exits nonzero when either source or model identity
+stability is not established. There is no automatic resume or replay of trials.
+
 The proposal/review implementation makes two independent planner calls. The reviewer
 receives the original goal and proposed plan, then returns a complete replacement plan.
 Both calls count against the engine planning budget; insufficient budget prevents the

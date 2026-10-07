@@ -150,3 +150,11 @@ stages stop, and final business verification is independent of stage success.
 This supports conditional workflows without claiming that an LLM reasons better.
 Model-directed replanning can be investigated through task planners within this
 boundary; no automatic replay or durable workflow claim is made.
+
+## October 7: preserve interrupted experiment evidence
+
+A local diagnostic run exposed that final identity-query failure prevented report
+creation. Persist metadata after every attempt, preserve partial denominators, and
+mark unavailable identity checks as unknown. Do not discard measured failures or
+silently resume trials. Add a network-free schedule preview so experiment size is
+reviewable before inference. This is an evidence-integrity fix, not a model gain.

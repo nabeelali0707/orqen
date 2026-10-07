@@ -53,6 +53,13 @@ def main() -> None:
     trials.add_argument("--repetitions", type=int, default=2)
     trials.add_argument("--seed", type=int, default=0)
     trials.add_argument("--timeout", type=float, default=120)
+    trials.add_argument(
+        "--variants", nargs="+", choices=("baseline", "retrieval", "no_recovery", "proposal_review")
+    )
+    trials.add_argument("--faults", choices=("both", "none", "transient"), default="both")
+    trials.add_argument(
+        "--dry-run", action="store_true", help="Preview the bounded schedule without inference"
+    )
     trials.add_argument("--output", type=Path, default=Path("runs/model-evaluation.json"))
     serve = subparsers.add_parser("serve", help="Serve the authenticated API and dashboard")
     serve.add_argument("--host", default="127.0.0.1")
@@ -136,20 +143,57 @@ def main() -> None:
         return
     if args.command == "evaluate-model":
         from .evaluation import write_report
-        from .model_evaluation import evaluate_models
+        from .model_evaluation import VARIANTS, evaluate_models
         from .providers.ollama import OllamaConfig
 
         config = OllamaConfig(
             args.model, seed=args.seed, timeout_seconds=args.timeout, max_output_tokens=512
         )
-        report = asyncio.run(evaluate_models(config, repetitions=args.repetitions, seed=args.seed))
+        variants = tuple(args.variants) if args.variants else VARIANTS
+        faults = {"both": (False, True), "none": (False,), "transient": (True,)}[args.faults]
+        if not 1 <= args.repetitions <= 100 or len(set(variants)) != len(variants):
+            parser.error("Use 1–100 repetitions and unique variants")
+        if args.dry_run:
+            print(
+                json.dumps(
+                    {
+                        "dry_run": True,
+                        "network_requests": 0,
+                        "scheduled_runs": args.repetitions * len(variants) * len(faults),
+                        "max_planning_calls": args.repetitions
+                        * len(faults)
+                        * sum(2 if v in {"proposal_review", "retrieval"} else 1 for v in variants),
+                        "variants": variants,
+                        "faults": faults,
+                    },
+                    indent=2,
+                )
+            )
+            return
+        report = asyncio.run(
+            evaluate_models(
+                config,
+                repetitions=args.repetitions,
+                seed=args.seed,
+                variants=variants,
+                faults=faults,
+                checkpoint=args.output,
+            )
+        )
         write_report(report, args.output)
         print(
             json.dumps(
-                {"identity_stable": report["identity_stable"], "summaries": report["summaries"]},
+                {
+                    "report_status": report["report_status"],
+                    "identity_stable": report["identity_stable"],
+                    "source_stable": report["source_stable"],
+                    "summaries": report["summaries"],
+                },
                 indent=2,
             )
         )
+        if report["identity_stable"] is not True or report["source_stable"] is not True:
+            raise SystemExit(1)
         return
     if args.command == "demo-ollama":
         from .providers.ollama import OllamaConfig, OllamaTransport

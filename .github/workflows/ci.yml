@@ -36,6 +36,7 @@ jobs:
       - run: python examples/structured_planner.py
       - run: python -m orqen.cli evaluate-catalog
       - run: python -m orqen.cli demo-ollama --model offline-placeholder --dry-run
+      - run: python -m orqen.cli evaluate-model --model offline-placeholder --repetitions 1 --variants baseline proposal_review --faults none --dry-run
       - run: python -m orqen.cli demo-hosted --provider mistral --model offline-placeholder --dry-run
       - run: python -m orqen.cli demo-hosted --provider openrouter --model offline-placeholder --dry-run
       - run: python -m pip wheel . --no-deps --wheel-dir dist

@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from .engine import Orchestrator
+from .evaluation import write_report
 from .models import Budget, Task, Tool, TransientToolError
 from .multi_agent import ReviewPlanner
 from .planning import JSONPlanner
@@ -82,6 +83,7 @@ async def evaluate_models(
     http_transport: Any = None,
     variants: tuple[str, ...] = VARIANTS,
     faults: tuple[bool, ...] = (False, True),
+    checkpoint: Path | None = None,
 ) -> dict:
     if type(repetitions) is not int or not 1 <= repetitions <= 100:
         raise ValueError("repetitions must be between 1 and 100")
@@ -103,6 +105,41 @@ async def evaluate_models(
     ]
     random.Random(seed).shuffle(schedule)
     rows = []
+    final_identity = final_source = None
+
+    def report(state: str) -> dict:
+        return {
+            "schema_version": 1,
+            "suite": "live-arithmetic-ablations-v1",
+            "evidence": "Local synthetic experiment; not AgentArch or held-out research evidence",
+            "report_status": state,
+            "scheduled_runs": len(schedule),
+            "completed_runs": len(rows),
+            "identity": identity,
+            "identity_stable": identity == final_identity if final_identity is not None else None,
+            "source_sha256": initial_source,
+            "source_sha256_after": final_source,
+            "source_stable": initial_source == final_source if final_source is not None else None,
+            "variants": list(variants),
+            "faults": list(faults),
+            "order_seed": seed,
+            "repetitions": repetitions,
+            "rows": rows,
+            "summaries": [
+                {
+                    "variant": v,
+                    "runs": sum(r["variant"] == v for r in rows),
+                    "verified": sum(r["variant"] == v and r["trace"]["verified"] for r in rows),
+                    "planner_calls": sum(
+                        r["trace"]["planner_calls"] for r in rows if r["variant"] == v
+                    ),
+                }
+                for v in variants
+            ],
+        }
+
+    if checkpoint is not None:
+        write_report(report("running"), checkpoint)
     for variant, fault, trial in schedule:
         attempts = []
 
@@ -182,31 +219,17 @@ async def evaluate_models(
                 "checks": arithmetic_checks(result.outputs, attempts),
             }
         )
-    final_identity = await model_identity(config, http_transport=http_transport)
+        if checkpoint is not None:
+            write_report(report("running"), checkpoint)
+    state = "complete"
+    try:
+        final_identity = await model_identity(config, http_transport=http_transport)
+    except Exception:
+        # Preserve measured rows when the local server disappears or changes.
+        # Never export provider exception text or claim identity stability.
+        state = "identity_unavailable"
     final_source = source_fingerprint()
-    return {
-        "schema_version": 1,
-        "suite": "live-arithmetic-ablations-v1",
-        "evidence": "Local synthetic model experiment; not AgentArch or held-out research evidence",
-        "identity": identity,
-        "identity_stable": identity == final_identity,
-        "source_sha256": initial_source,
-        "source_sha256_after": final_source,
-        "source_stable": initial_source == final_source,
-        "variants": list(variants),
-        "faults": list(faults),
-        "order_seed": seed,
-        "repetitions": repetitions,
-        "rows": rows,
-        "summaries": [
-            {
-                "variant": v,
-                "runs": sum(r["variant"] == v for r in rows),
-                "verified": sum(r["variant"] == v and r["trace"]["verified"] for r in rows),
-                "planner_calls": sum(
-                    r["trace"]["planner_calls"] for r in rows if r["variant"] == v
-                ),
-            }
-            for v in variants
-        ],
-    }
+    result = report(state)
+    if checkpoint is not None:
+        write_report(result, checkpoint)
+    return result
