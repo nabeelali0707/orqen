@@ -15,6 +15,8 @@
 - [x] Bounded recovery for safe transient failures.
 - [x] Local examples and behavioral tests covering failures and side effects.
 - [x] Whole-plan preflight for known defects before writes, plus partial-write reconciliation metadata.
+- [x] Observation-driven application stages with shared budgets and independent final verification.
+- [x] Conditional refund sandbox with ledger grading, stale-state checks and uncertain-write tests.
 
 ## 2. Controlled local experiments
 
@@ -41,6 +43,8 @@ After the independent review, action contracts and independent grading take prio
 - [x] AgentArch data/tool/grading adapter pinned to an upstream revision; both use cases validated.
 - [x] Repeated-trial runner and live local ablation run; 0/16 verified outcomes are recorded in [model results](model-results.md).
 - [x] Concrete proposal/review agents with independently counted planning calls and enforced budgets.
+- [x] Atomic experiment checkpoints, partial-run status and network-free schedule preview.
+- [x] Explicit application step identifiers; one constrained Llama diagnostic passed the unchanged verifier.
 
 ## 4. Product interfaces, subject to evidence
 
@@ -50,3 +54,14 @@ After the independent review, action contracts and independent grading take prio
 - [x] MCP stdio server using the official SDK; tested with a real MCP client.
 
 Each major milestone should produce a reviewed diff, relevant passing checks, and a descriptive local commit. Do not push until the user explicitly authorizes it again. A milestone is not complete merely because its interfaces have been scaffolded. See [the completion plan](completion-plan.md) for remaining work and required owner inputs.
+
+## 5. SDK distribution
+
+- [x] Offline wheel build, runtime-asset audit and installed-wheel workflow smoke.
+- [x] Wheel checks added to the Python 3.11–3.14 CI matrix.
+- [ ] Updated remote CI passing on the release commit.
+- [ ] Owner-selected distribution license and package registry/account verification.
+- [ ] SDK publication, explicitly deferred until the release gates are met.
+
+See [release readiness](release-readiness.md). Engineering validation does not
+establish adaptive-reasoning superiority or production readiness.

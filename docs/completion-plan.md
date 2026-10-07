@@ -8,6 +8,8 @@ reasoning improvement or a deployed production service.
 
 - Modular SDK with permissions, contracts, whole-plan preflight, task verification,
   bounded read recovery and uncertain-write metadata.
+- Bounded observation-driven workflow stages and a conditional refund sandbox
+  with independent state grading across 32 normal/fault scenarios.
 - Ollama transport with explicit settings and typed provider grammar; a live Qwen
   smoke test passed. Llama's failed output-step contract is retained as evidence.
 - Paired repeated-trial runner with retrieval, recovery and two-agent proposal/review
@@ -49,6 +51,13 @@ adaptive routing improves enterprise outcomes.
 The local Qwen ablation run verified 0 of 16 attempts; see `model-results.md`.
 Diagnose these failures before expanding comparisons. Hosted model selection and
 authorized live compatibility checks are still pending.
+
+October 7 diagnosis found correct Llama arithmetic but an incorrect internal output
+name. An explicit optional step-ID contract then passed one constrained diagnostic
+without changing the grader. Atomic checkpoints now preserve completed attempts if
+the final model identity query fails. These are integration fixes, not held-out
+reliability evidence. The SDK wheel is locally checked; publication gates are listed
+in `release-readiness.md`.
 
 The API is locally tested and self-hostable. Public hosting is not deployed. The
 SQLite service supports one process per database, bounded concurrency and history,

@@ -7,14 +7,22 @@ decisions.
 
 ## Checked locally on October 7, 2026
 
-- Full suite with the pinned AgentArch checkout: 249 passing tests.
+- Full suite with the pinned AgentArch checkout: 266 passing tests.
 - Conditional refund regression: 32 expected-behavior checks, including uncertain
   and blocked outcomes; see `return-workflow.md` for the separate completion count.
 - Wheel built offline with locally installed setuptools 81.0.0.
+- Source archive includes the SDK guides, runnable examples and wheel checker.
+  Its path/key-pattern audit passed, and a wheel rebuilt from that source archive
+  passed the installed-wheel smoke check.
 - Wheel member audit found the required runtime assets and no prohibited paths or
   matching provider-key patterns. Pattern checks are not a complete secret audit.
 - Installed wheel imported from a temporary directory outside the source tree and
   passed all 32 workflow checks. No dependency download or inference was required.
+- One constrained local Llama planning attempt passed the unchanged synthetic
+  verifier after an unconstrained attempt failed on naming. This is one-case
+  compatibility evidence only; see `model-results.md` for identities and limits.
+- Interrupted experiments now retain completed metadata checkpoints and explicitly
+  mark unavailable identity verification rather than silently discarding results.
 
 Reproduce the packaging checks in an environment with setuptools, pip and the
 runtime dependencies already installed:

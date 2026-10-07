@@ -107,3 +107,20 @@ This motivates an explicit, optional application-owned identifier contract in
 without renaming generated output or changing the original task grader. The model
 evaluation runner records this as a distinct `constrain_step_ids` treatment; the
 default remains unconstrained for reproducibility of the earlier configuration.
+
+### October 7 constrained identifier check
+
+One baseline attempt from commit `1799d76`, with `constrain_step_ids=true`, passed
+the unchanged verifier: **1/1 verified**. All four diagnostics passed: required
+tool, operands, identifier and arithmetic value. It used one planning call and one
+tool call, taking 54.59 seconds, with 729 input tokens and 50 output tokens.
+Model digest, server version, seed, temperature, token/context limits and timeout
+matched the preceding Llama diagnostic. Model and source fingerprints were stable;
+source SHA-256 was
+`4330c3937571a961599ebf9ccc49dce2877020b289699e212f76b2a56ad3e273`.
+
+The explicit schema constraint fixes this observed contract case without rewriting
+the response or relaxing the verifier. These sequential one-case diagnostics are
+not independent held-out evaluation, a statistical comparison, a latency advantage
+or evidence of improved reasoning. The old unconstrained failure remains part of
+the record. No hosted inference or AgentArch model benchmark was performed.
