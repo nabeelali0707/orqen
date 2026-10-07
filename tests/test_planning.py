@@ -51,6 +51,47 @@ def test_json_generation_runs_through_contract_executor():
     assert result.calls == 1 and result.trace()["planner_calls"] == 1
 
 
+@pytest.mark.parametrize(
+    "raw,verified",
+    [
+        (response(step("result")), True),
+        (response(step("result_step")), False),
+        ('{"kind":"direct","result":4}', False),
+    ],
+)
+def test_application_step_contract_is_enforced_without_renaming(raw, verified):
+    async def generate(request):
+        assert request.response_schema["$defs"]["step"]["properties"]["id"] == {"enum": ["result"]}
+        request.response_schema["$defs"]["step"]["properties"]["id"] = {}
+        return raw
+
+    engine = Orchestrator(
+        ToolRegistry((make_tool(),)),
+        planner=JSONPlanner(generate, max_steps=1, step_ids=("result",)),
+    )
+    result = asyncio.run(engine.run(Task("Double a number", lambda o: o == {"result": 4})))
+    assert result.verified is verified
+    assert result.calls == int(verified)
+    if not verified:
+        assert result.failure == Failure.PLAN
+
+
+@pytest.mark.parametrize("ids", [(), ("direct",), ("",), ("x", "x"), (1,), "name", ("a", "b")])
+def test_invalid_step_contract_is_rejected(ids):
+    with pytest.raises(ValueError):
+        JSONPlanner(lambda _: None, max_steps=1, step_ids=ids)
+
+
+def test_step_contract_requires_all_identifiers_exactly_once():
+    async def generate(_):
+        return response(step("first"), step("first"))
+
+    planner = JSONPlanner(generate, max_steps=2, step_ids=("first", "result"))
+    engine = Orchestrator(ToolRegistry((make_tool(),)), planner=planner)
+    result = asyncio.run(engine.run(Task("Double", lambda _: True)))
+    assert result.failure == Failure.PLAN and result.calls == 0
+
+
 def test_reference_plan_is_decoded_and_ordered():
     result = execute(
         response(

@@ -84,7 +84,10 @@ async def evaluate_models(
     variants: tuple[str, ...] = VARIANTS,
     faults: tuple[bool, ...] = (False, True),
     checkpoint: Path | None = None,
+    constrain_step_ids: bool = False,
 ) -> dict:
+    if type(constrain_step_ids) is not bool:
+        raise ValueError("constrain_step_ids must be a boolean")
     if type(repetitions) is not int or not 1 <= repetitions <= 100:
         raise ValueError("repetitions must be between 1 and 100")
     if (
@@ -124,6 +127,7 @@ async def evaluate_models(
             "faults": list(faults),
             "order_seed": seed,
             "repetitions": repetitions,
+            "constrain_step_ids": constrain_step_ids,
             "rows": rows,
             "summaries": [
                 {
@@ -182,10 +186,13 @@ async def evaluate_models(
         )
         settings = replace(config, seed=config.seed + trial)
         transports = [OllamaTransport(settings, http_transport=http_transport)]
-        planner = JSONPlanner(transports[0], max_steps=1)
+        step_ids = ("sum",) if constrain_step_ids else None
+        planner = JSONPlanner(transports[0], max_steps=1, step_ids=step_ids)
         if variant == "proposal_review":
             transports.append(OllamaTransport(settings, http_transport=http_transport))
-            planner = ReviewPlanner(planner, JSONPlanner(transports[1], max_steps=1))
+            planner = ReviewPlanner(
+                planner, JSONPlanner(transports[1], max_steps=1, step_ids=step_ids)
+            )
         budget = Budget(
             max_calls=2,
             max_steps=1,

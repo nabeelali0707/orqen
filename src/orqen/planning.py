@@ -21,8 +21,8 @@ class PlanningTransportError(Exception):
     """A provider request failed, rather than returning an invalid plan."""
 
 
-def response_schema(max_steps: int = 20) -> dict[str, Any]:
-    return {
+def response_schema(max_steps: int = 20, step_ids: tuple[str, ...] | None = None) -> dict[str, Any]:
+    schema = {
         "oneOf": [
             {
                 "type": "object",
@@ -111,6 +111,16 @@ def response_schema(max_steps: int = 20) -> dict[str, Any]:
             },
         },
     }
+    if step_ids is not None:
+        schema["$defs"]["step"]["properties"]["id"] = {"enum": list(step_ids)}
+        schema["oneOf"] = [
+            branch
+            for branch in schema["oneOf"]
+            if branch["properties"]["kind"]["const"] != "direct"
+        ]
+        steps = schema["oneOf"][-1]["properties"]["steps"]
+        steps["minItems"] = steps["maxItems"] = len(step_ids)
+    return schema
 
 
 @dataclass(frozen=True)
@@ -147,6 +157,7 @@ class JSONPlanner:
         *,
         max_steps: int = 20,
         max_response_bytes: int = 65_536,
+        step_ids: tuple[str, ...] | None = None,
     ) -> None:
         for value in (max_steps, max_response_bytes):
             if type(value) is not int or value < 1:
@@ -154,13 +165,26 @@ class JSONPlanner:
         self.generate = generate
         self.max_steps = max_steps
         self.max_response_bytes = max_response_bytes
+        if step_ids is not None:
+            if (
+                not isinstance(step_ids, (tuple, list))
+                or not 1 <= len(step_ids) <= max_steps
+                or any(
+                    type(name) is not str or not name.strip() or name == "direct"
+                    for name in step_ids
+                )
+                or len(set(step_ids)) != len(step_ids)
+            ):
+                raise ValueError("step_ids must contain unique non-reserved names within max_steps")
+            step_ids = tuple(step_ids)
+        self.step_ids = step_ids
 
     async def plan(self, goal: str, catalog: tuple[dict[str, Any], ...]) -> Plan:
         # The transport receives copies; mutating its prompt cannot authorize a tool.
         offered = {tool["name"]: deepcopy(tool) for tool in catalog}
         if len(offered) != len(catalog):
             raise ValueError("Duplicate catalog tool names")
-        schema = response_schema(self.max_steps)
+        schema = response_schema(self.max_steps, self.step_ids)
         raw = await self.generate(PlanningRequest(goal, deepcopy(catalog), deepcopy(schema)))
         if type(raw) is not str or len(raw.encode("utf-8")) > self.max_response_bytes:
             raise ValueError("Planner response is not bounded JSON text")

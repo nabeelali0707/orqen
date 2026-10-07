@@ -58,6 +58,11 @@ def main() -> None:
     )
     trials.add_argument("--faults", choices=("both", "none", "transient"), default="both")
     trials.add_argument(
+        "--constrain-step-ids",
+        action="store_true",
+        help="Encode application step identifiers in the planning contract",
+    )
+    trials.add_argument(
         "--dry-run", action="store_true", help="Preview the bounded schedule without inference"
     )
     trials.add_argument("--output", type=Path, default=Path("runs/model-evaluation.json"))
@@ -165,6 +170,7 @@ def main() -> None:
                         * sum(2 if v in {"proposal_review", "retrieval"} else 1 for v in variants),
                         "variants": variants,
                         "faults": faults,
+                        "constrain_step_ids": args.constrain_step_ids,
                     },
                     indent=2,
                 )
@@ -178,6 +184,7 @@ def main() -> None:
                 variants=variants,
                 faults=faults,
                 checkpoint=args.output,
+                constrain_step_ids=args.constrain_step_ids,
             )
         )
         write_report(report, args.output)

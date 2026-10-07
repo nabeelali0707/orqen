@@ -158,3 +158,13 @@ creation. Persist metadata after every attempt, preserve partial denominators, a
 mark unavailable identity checks as unknown. Do not discard measured failures or
 silently resume trials. Add a network-free schedule preview so experiment size is
 reviewable before inference. This is an evidence-integrity fix, not a model gain.
+
+## October 7: identifiers are an application contract
+
+A completed Llama diagnostic used the right tool, operands and arithmetic value
+but failed the exact output-name requirement despite the prompt reminder. Internal
+identifiers should be expressible as structured application constraints. Add an
+optional exact step-ID set to JSONPlanner, enforce it before tools run and keep the
+existing grader unchanged. Keep the unconstrained evaluation configuration as the
+default and record constrained generation as a distinct treatment. Success under
+this constraint would establish compatibility on the fixture, not reasoning gains.

@@ -28,6 +28,11 @@ rows remain available with `report_status: identity_unavailable` and
 `identity_stable: null`. The CLI exits nonzero when either source or model identity
 stability is not established. There is no automatic resume or replay of trials.
 
+`--constrain-step-ids` explicitly adds the required `sum` identifier to the planner's
+schema and disallows direct answers. Reports record this treatment. It tests an
+application contract, not better model reasoning, and must not be mixed silently
+with unconstrained trials. The original tool/operand/output verifier is unchanged.
+
 The proposal/review implementation makes two independent planner calls. The reviewer
 receives the original goal and proposed plan, then returns a complete replacement plan.
 Both calls count against the engine planning budget; insufficient budget prevents the

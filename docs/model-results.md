@@ -86,3 +86,24 @@ check raised. The runner now checkpoints each completed attempt and preserves ro
 with unknown identity stability when that final query fails. Offline tests cover
 server disappearance, cancellation and failed atomic report replacement. These
 fixes cannot reconstruct the missing outcomes from the earlier attempt.
+
+### October 7 Llama diagnostic
+
+One baseline attempt using installed `llama3.2:3b` completed from commit `1dba805`.
+It made one planning call and one tool call in 72.00 seconds. The independent
+diagnostics confirmed the required tool, operands 7 and 4, and value 11. The exact
+output identifier was wrong, so the unchanged verifier failed: **0/1 verified**.
+This directly shows that a prompt reminder alone did not fix this case.
+
+Model and source fingerprints were stable across the run. Ollama was `0.30.10`,
+model digest `a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72`,
+Q4_K_M, temperature 0, seed 0, 512 output tokens, 8192 context tokens and a
+180-second request timeout. Usage was 773 input tokens and 51 output tokens.
+Source SHA-256 was
+`f026c3ec48a6dcf8598caad1bf19adbccf03d008fae4e2f15c16f3400de9f010`.
+
+This motivates an explicit, optional application-owned identifier contract in
+`JSONPlanner`. It supplies the same requested names as structured constraints,
+without renaming generated output or changing the original task grader. The model
+evaluation runner records this as a distinct `constrain_step_ids` treatment; the
+default remains unconstrained for reproducibility of the earlier configuration.

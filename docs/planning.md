@@ -82,4 +82,15 @@ All planning time counts against the run deadline. `RunResult.planner_calls` cou
 
 ## Limits
 
-The replay example and tests do not exercise a live model. There is no claim of improved reasoning, planning accuracy, or reduced model cost. Full plans are generated before tool execution; branching or replanning based on observations is not implemented. A model could fail to notice a missing prerequisite and never request expansion. Keep the full catalog default until application-specific evidence supports filtering.
+The replay example and tests do not exercise a live model. There is no claim of improved reasoning, planning accuracy, or reduced model cost. Full plans are generated before each stage executes; `WorkflowRunner` supports application-owned branching between stages. A model could fail to notice a missing prerequisite and never request expansion. Keep the full catalog default until application-specific evidence supports filtering.
+
+## Application-owned step identifiers
+
+When a workflow requires exact internal output names, configure
+`JSONPlanner(transport, max_steps=1, step_ids=("sum",))`. This optional contract
+requires every listed step exactly once, excludes direct answers, and permits
+catalog expansion. It constrains the generation schema and is independently
+validated before execution. It never renames returned steps or repairs an invalid
+plan. Omit it for open-ended plans whose step names are not application requirements.
+This is a complete set of identifiers, not a subset: prerequisite steps must also
+be listed. Tool choice, arguments, permissions and final grading remain separate.

@@ -152,6 +152,27 @@ def test_final_identity_failure_preserves_rows_and_does_not_claim_stability(tmp_
     assert "private provider details" not in output.read_text()
 
 
+def test_step_contract_treatment_is_recorded_and_sent_to_provider():
+    def constrained(request):
+        if request.url.path == "/api/chat":
+            body = json.loads(request.content)
+            branches = body["format"]["$defs"]["step"]["oneOf"]
+            assert all(branch["properties"]["id"] == {"enum": ["sum"]} for branch in branches)
+        return handler(request)
+
+    report = asyncio.run(
+        evaluate_models(
+            OllamaConfig("test"),
+            repetitions=1,
+            variants=("baseline",),
+            faults=(False,),
+            constrain_step_ids=True,
+            http_transport=httpx.MockTransport(constrained),
+        )
+    )
+    assert report["constrain_step_ids"] and report["rows"][0]["trace"]["verified"]
+
+
 def test_cancellation_leaves_completed_trial_checkpoint(tmp_path):
     output = tmp_path / "report.json"
     calls = 0
