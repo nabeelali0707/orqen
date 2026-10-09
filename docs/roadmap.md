@@ -45,6 +45,7 @@ After the independent review, action contracts and independent grading take prio
 - [x] Concrete proposal/review agents with independently counted planning calls and enforced budgets.
 - [x] Atomic experiment checkpoints, partial-run status and network-free schedule preview.
 - [x] Explicit application step identifiers; one constrained Llama diagnostic passed the unchanged verifier.
+- [x] Officially graded AgentArch attempt runner, frozen protocol metadata and all-case negative controls.
 
 ## 4. Product interfaces, subject to evidence
 

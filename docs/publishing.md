@@ -54,6 +54,17 @@ python scripts/check_wheel.py dist/alpha/orqen-0.1.0a1-py3-none-any.whl
 The release checker rejects stale or extra files in the artifact directory. Do not
 upload the older development wheels in the top-level `dist/` directory.
 
+If working offline without the `build` frontend but with setuptools already
+installed, the source/wheel build can instead use:
+
+```sh
+python -c "from setuptools.build_meta import build_sdist; build_sdist('dist/alpha')"
+python -m pip wheel dist/alpha/orqen-0.1.0a1.tar.gz --no-index --no-deps --no-build-isolation --wheel-dir dist/alpha
+```
+
+This fallback does not replace the publishing workflow's strict Twine check or
+its clean installation matrix.
+
 ## TestPyPI installation check (after upload)
 
 In a fresh virtual environment, install dependencies from PyPI and then request

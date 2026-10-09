@@ -14,6 +14,7 @@ import subprocess
 import sys
 import tempfile
 import zipfile
+from email.parser import BytesParser
 from pathlib import Path, PurePosixPath
 
 
@@ -26,6 +27,7 @@ def check_wheel(path: Path) -> dict:
         if len(metadata) != 1:
             raise ValueError("Expected one distribution metadata file")
         dist_info = metadata[0].split("/")[0]
+        metadata_version = BytesParser().parsebytes(archive.read(metadata[0]))["Version"]
         for name in names:
             parts = PurePosixPath(name).parts
             if (
@@ -72,18 +74,31 @@ def check_wheel(path: Path) -> dict:
         # -I avoids current-directory/PYTHONPATH imports. Explicitly prepend only
         # the newly installed wheel and assert the module's origin before running.
         code = """
-import asyncio, json, sys
+import asyncio, contextlib, io, json, sys
+from importlib.metadata import version
 from pathlib import Path
 sys.path.insert(0, sys.argv[1])
 import orqen
 from orqen.return_workflow import evaluate_returns
 assert Path(orqen.__file__).is_relative_to(Path(sys.argv[1]))
+installed_version = version("orqen")
+assert installed_version == sys.argv[2]
 report = asyncio.run(evaluate_returns())
 assert report["checks_passed"] == report["runs"] == 32
-print(json.dumps({"installed_wheel": True, "workflow_checks": 32}))
+from orqen.cli import main
+sys.argv = ["orqen", "--version"]
+output = io.StringIO()
+with contextlib.redirect_stdout(output):
+    try:
+        main()
+    except SystemExit as exit_status:
+        assert exit_status.code == 0
+assert output.getvalue().strip() == f"orqen {installed_version}"
+print(json.dumps({"installed_wheel": True, "workflow_checks": 32,
+                  "installed_version": installed_version, "cli_version_checked": True}))
 """
         completed = subprocess.run(
-            [sys.executable, "-I", "-c", code, str(target)],
+            [sys.executable, "-I", "-c", code, str(target), metadata_version],
             cwd=directory,
             check=True,
             capture_output=True,

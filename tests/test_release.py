@@ -1,4 +1,7 @@
+import io
 import runpy
+import tarfile
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -36,6 +39,25 @@ def test_release_rejects_stale_distribution_files(tmp_path):
     dist.mkdir()
     (dist / "old.whl").write_bytes(b"stale")
     with pytest.raises(ValueError, match="exactly"):
+        check_release(root, "v0.1.0a1", artifacts=dist)
+
+
+@pytest.mark.parametrize("member", [".env", "runs/private.json", "../escape"])
+def test_release_rejects_sensitive_or_escaping_source_archive_members(tmp_path, member):
+    root = release_tree(tmp_path)
+    dist = root / "dist"
+    dist.mkdir()
+    with zipfile.ZipFile(dist / "orqen-0.1.0a1-py3-none-any.whl", "w") as wheel:
+        wheel.writestr(
+            "orqen-0.1.0a1.dist-info/METADATA",
+            "Name: orqen\nVersion: 0.1.0a1\nLicense-Expression: MIT\n",
+        )
+        wheel.writestr("orqen-0.1.0a1.dist-info/licenses/LICENSE", "MIT License")
+    with tarfile.open(dist / "orqen-0.1.0a1.tar.gz", "w:gz") as source:
+        entry = tarfile.TarInfo(f"orqen-0.1.0a1/{member}")
+        entry.size = 4
+        source.addfile(entry, io.BytesIO(b"data"))
+    with pytest.raises(ValueError, match="sensitive"):
         check_release(root, "v0.1.0a1", artifacts=dist)
 
 

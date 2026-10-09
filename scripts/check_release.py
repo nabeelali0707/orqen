@@ -9,7 +9,7 @@ import tarfile
 import tomllib
 import zipfile
 from email.parser import BytesParser
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 
 def check_release(root: Path, tag: str, *, artifacts: Path | None = None) -> str:
@@ -39,6 +39,28 @@ def check_release(root: Path, tag: str, *, artifacts: Path | None = None) -> str
             ):
                 raise ValueError("Wheel license differs from source")
         with tarfile.open(artifacts / f"orqen-{version}.tar.gz") as source:
+            for member in source.getmembers():
+                parts = PurePosixPath(member.name).parts
+                if (
+                    not parts
+                    or parts[0] != f"orqen-{version}"
+                    or ".." in parts
+                    or "\\" in member.name
+                    or not (member.isdir() or member.isfile())
+                    or any(
+                        p.startswith(".env") or p in {"runs", "secrets", ".git", ".venv"}
+                        for p in parts
+                    )
+                ):
+                    raise ValueError("Unexpected or sensitive source archive member")
+                if member.isfile():
+                    data = source.extractfile(member)
+                    if data is None or member.size > 10_000_000:
+                        raise ValueError("Unexpected source archive payload")
+                    if re.search(
+                        rb"sk-or-v1-[a-fA-F0-9]{32,}|mstrl_[A-Za-z0-9_-]{30,}", data.read()
+                    ):
+                        raise ValueError("Possible provider credential in source archive")
             metadata_file = source.extractfile(f"orqen-{version}/PKG-INFO")
             if metadata_file is None:
                 raise ValueError("Source metadata missing")

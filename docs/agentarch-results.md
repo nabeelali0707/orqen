@@ -25,3 +25,11 @@ working implementation. Do not describe these runs as a released artifact benchm
 
 Raw local reports are ignored by Git. See `agentarch-pilot.md` for reproduction,
 protocol choices, independent grading and evidence limits.
+
+## October 9 local-model pilot status
+
+The model pilot was prepared for time-off case 2 in whole-plan mode using installed
+Llama 3.2 3B, but automatic approval review blocked the command to start or reuse
+Ollama before execution. No model request or benchmark task attempt occurred.
+The preview protocol can be reproduced with the pilot script; no model-success
+claim is made from the 110 negative controls.

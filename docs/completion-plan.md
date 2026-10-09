@@ -1,6 +1,6 @@
 # What remains to complete Orqen
 
-Status: October 7, 2026. The research and interface implementations
+Status: October 9, 2026. The research and interface implementations
 have been prioritized. They establish a working prototype, not a validated adaptive
 reasoning improvement or a deployed production service.
 
@@ -29,7 +29,7 @@ reasoning improvement or a deployed production service.
 | First real workflow, tools/sandbox, policy rules and anonymized examples with expected outcomes | Application-specific adapters, verifiers and held-out evaluation |
 | Acceptable failure, latency and cost limits; actions needing human confirmation | Meaningful acceptance criteria and execution policy |
 | Hosting destination and domain, if a public service is wanted | TLS, secrets, persistent storage, monitoring and deployment |
-| Intended release/license and deadline | A distributable SDK or scoped production pilot |
+| PyPI/TestPyPI account configuration | First publication of the prepared MIT-licensed alpha SDK |
 
 No new model key is needed for local experiments: installed Ollama models are
 available. Use local environment configuration for future provider credentials;
@@ -58,6 +58,14 @@ without changing the grader. Atomic checkpoints now preserve completed attempts 
 the final model identity query fails. These are integration fixes, not held-out
 reliability evidence. The SDK wheel is locally checked; publication gates are listed
 in `release-readiness.md`.
+
+Alpha release preparation now includes `0.1.0a1` metadata, MIT licensing, release
+notes, a manual Trusted Publishing workflow, tag/artifact checks, and package smoke
+validation. The AgentArch runner now invokes the official grader after bounded
+whole-plan or observation-driven attempts. It rejected all 110 empty-answer negative
+controls. A local model pilot was blocked by execution approval review before
+inference and is not counted as a benchmark result. See `publishing.md` and
+`agentarch-results.md` for the concrete remaining external steps and evidence.
 
 The API is locally tested and self-hostable. Public hosting is not deployed. The
 SQLite service supports one process per database, bounded concurrency and history,

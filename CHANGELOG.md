@@ -14,6 +14,8 @@ This release does not claim improved agent reasoning or production readiness.
 - Strict JSON planning with optional application-owned step identifiers; optional
   Ollama, Mistral and OpenRouter transports; experimental proposal/review planning.
 - Checkpointed model experiments and a pinned AgentArch mock-data/grader adapter.
+- Officially graded, bounded whole-plan/observation-driven AgentArch pilot runner;
+  all 110 finish-only negative controls rejected, without model inference.
 - Authenticated local API, execution dashboard and MCP stdio interface.
 - Stateful regression fixtures, a conditional refund sandbox, and an audited wheel.
 

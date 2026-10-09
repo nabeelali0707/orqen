@@ -46,6 +46,14 @@ milestone, and the alpha source archive produced an audited wheel that passed
 the installed-package smoke. Local Twine is unavailable; the workflow runs
 `twine check --strict` before uploading. The publishing workflow has not run.
 
+After the benchmark runner and source-archive guards were added, the final local
+suite passed **283 tests**. The rebuilt `0.1.0a1` wheel passed metadata/license
+identity checks, file/key-pattern audits, all 32 installed workflow checks, and
+the installed CLI version check. Builds used the installed setuptools backend
+and `pip wheel --no-index --no-deps --no-build-isolation`; the separate `build`
+frontend and Twine were not available locally. Dependency resolution and the new
+publishing workflow still require the release CI run. No distribution was uploaded.
+
 1. Review the newly added MIT license and `0.1.0a1` release notes.
 2. Push the release-preparation commit and pass CI on the exact tagged release.
 3. Configure the owner's PyPI/TestPyPI Trusted Publishers and run the prepared
