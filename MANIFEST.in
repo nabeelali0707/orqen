@@ -1,4 +1,5 @@
 recursive-include docs *.md
 recursive-include examples *.py
-include scripts/check_wheel.py
+include scripts/check_wheel.py scripts/check_release.py CHANGELOG.md LICENSE
+include .github/workflows/ci.yml .github/workflows/publish.yml
 global-exclude __pycache__ *.py[cod]

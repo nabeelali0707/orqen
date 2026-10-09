@@ -2,6 +2,9 @@
 
 **Adaptive Agent Orchestrator**
 
+Release candidate: **0.1.0a1**, MIT licensed, experimental APIs. See the
+[release notes](CHANGELOG.md) and [publishing guide](docs/publishing.md).
+
 Orqen is a proposed orchestration engine that helps agents choose an execution strategy, discover relevant tools, validate calls, verify outcomes, and recover from failures within explicit limits.
 
 Orqen includes a working modular Python SDK with deterministic routing, dependency-aware execution, JSON Schema validation, application-owned permissions, task verification, and bounded read recovery. The Ollama transport has passed a live Qwen smoke test. An opt-in proposal/review planner makes two measured agent calls. An authenticated API, dashboard, and MCP stdio server expose registered workflows.

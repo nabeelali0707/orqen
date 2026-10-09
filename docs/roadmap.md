@@ -60,7 +60,8 @@ Each major milestone should produce a reviewed diff, relevant passing checks, an
 - [x] Offline wheel build, runtime-asset audit and installed-wheel workflow smoke.
 - [x] Wheel checks added to the Python 3.11–3.14 CI matrix.
 - [ ] Updated remote CI passing on the release commit.
-- [ ] Owner-selected distribution license and package registry/account verification.
+- [x] MIT license, alpha versioning, release notes and manual Trusted Publishing workflow.
+- [ ] Owner's package registry/account configuration and first registry installation check.
 - [ ] SDK publication, explicitly deferred until the release gates are met.
 
 See [release readiness](release-readiness.md). Engineering validation does not

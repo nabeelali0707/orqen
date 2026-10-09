@@ -1,0 +1,109 @@
+name: Publish alpha SDK
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing alpha tag, for example v0.1.0a1
+        required: true
+        type: string
+      registry:
+        description: Destination registry
+        required: true
+        default: testpypi
+        type: choice
+        options: [testpypi, pypi]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ inputs.registry }}-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate release identity
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: python scripts/check_release.py --tag "$RELEASE_TAG" --require-git-tag
+      - run: python -m pip install build twine jsonschema
+      - run: python -m build
+      - run: python -m twine check --strict dist/*
+      - name: Validate built identities
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: python scripts/check_release.py --tag "$RELEASE_TAG" --artifacts dist
+      - run: python scripts/check_wheel.py dist/*.whl
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distributions
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 7
+
+  test-installed:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: dist
+      - name: Install built wheel with test extras
+        run: python -m pip install "$(find dist -name '*.whl')[dev,research,web,mcp]"
+      - run: python -c "import orqen; assert 'site-packages' in orqen.__file__"
+      - uses: actions/checkout@v4
+        with:
+          repository: ServiceNow/AgentArch
+          ref: dfdd9cd69642f74d7f2c72738c96faff7b70e59f
+          path: runs/upstream/AgentArch
+          persist-credentials: false
+      - run: python -m pytest -q
+        env:
+          ORQEN_AGENTARCH_CHECKOUT: runs/upstream/AgentArch
+      - run: ruff check src tests examples scripts
+      - run: ruff format --check src tests examples scripts
+      - run: python examples/returns_workflow.py
+      - run: python -m orqen.cli demo-hosted --provider mistral --model offline --dry-run
+
+  publish:
+    needs: [build, test-installed]
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.registry }}
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: dist
+      - name: Publish to TestPyPI
+        if: inputs.registry == 'testpypi'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+      - name: Publish to PyPI
+        if: inputs.registry == 'pypi'
+        uses: pypa/gh-action-pypi-publish@release/v1

@@ -35,15 +35,23 @@ python scripts/check_wheel.py dist/orqen-0.1.0-py3-none-any.whl
 The smoke test intentionally reuses installed dependencies. It does not establish
 clean dependency resolution across all supported Python versions. CI now builds
 and checks the wheel on its Python 3.11–3.14 matrix; those remote runs are not yet
-evidence for these unpushed commits.
+evidence for later release-preparation changes. The October 7 source at `9a6d08a`
+passed [remote CI](https://github.com/nabeelali0707/orqen/actions/runs/37605491345).
 
 ## Gates before publication
 
-1. Choose and add the owner's distribution license; no license is currently declared.
-2. Run the updated CI matrix on the exact release commit and resolve any failures.
-3. Verify package-name availability and publishing-account access when publication
-   is authorized. No registry credentials are needed for local wheel validation.
-4. Use alpha release positioning and preserve the measured failures and limits.
+October 9 preparation: `0.1.0a1`, MIT metadata/license, release notes, and the
+manual TestPyPI/PyPI workflow are implemented. All 273 tests passed at this
+milestone, and the alpha source archive produced an audited wheel that passed
+the installed-package smoke. Local Twine is unavailable; the workflow runs
+`twine check --strict` before uploading. The publishing workflow has not run.
+
+1. Review the newly added MIT license and `0.1.0a1` release notes.
+2. Push the release-preparation commit and pass CI on the exact tagged release.
+3. Configure the owner's PyPI/TestPyPI Trusted Publishers and run the prepared
+   manual publishing workflow. See `publishing.md` for the exact account fields.
+4. Verify registry installation, then publish with alpha positioning and preserve
+   the measured failures and limits.
    Do not describe this package as a validated enterprise or adaptive-reasoning solution.
 
 ## Gates for the stronger research or production claim
