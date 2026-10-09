@@ -51,3 +51,7 @@ Proposal/review planning is also not equivalent to AgentArch's orchestrator mode
 
 Set `ORQEN_AGENTARCH_CHECKOUT` to the pinned checkout to run the optional integration
 tests. CI fetches this exact revision for these tests. Unit tests run offline otherwise.
+
+The [bounded pilot runner](agentarch-pilot.md) now connects whole-plan and
+observation-driven execution to the official grader. See [evaluation evidence](agentarch-results.md)
+for the all-case negative controls and subsequent pilot results.

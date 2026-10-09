@@ -68,6 +68,8 @@ Orqen is an independent project, not an AgentArch implementation. Its local faul
 - [Development milestones](docs/roadmap.md)
 - [Completion plan and owner inputs](docs/completion-plan.md)
 - [SDK release checks and publication gates](docs/release-readiness.md)
+- [Officially graded AgentArch pilot](docs/agentarch-pilot.md)
+- [AgentArch evaluation evidence](docs/agentarch-results.md)
 
 ## Development workflow
 

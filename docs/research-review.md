@@ -168,3 +168,12 @@ optional exact step-ID set to JSONPlanner, enforce it before tools run and keep 
 existing grader unchanged. Keep the unconstrained evaluation configuration as the
 default and record constrained generation as a distinct treatment. Success under
 this constraint would establish compatibility on the fixture, not reasoning gains.
+
+## October 9: benchmark attempts must reach the independent grader
+
+Connect the pinned AgentArch adapter to a bounded evaluation runner before adding
+more routing features. Compare whole-plan and observation-driven single-agent
+execution with shared caps and record realized call counts. Keep labels out of
+planning, grade only after termination, preserve failed attempts, and export only
+an allowlist of scalar metrics. First validate the grading pipeline using an empty
+finish-only negative control; it is not a solver baseline or model performance.
